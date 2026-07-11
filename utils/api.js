@@ -1,2 +1,1 @@
-// Actualizar con la URL de Railway una vez desplegado el backend.
-export const API = 'http://localhost:3000';
+export const API = 'https://cr-desarrollos-backend-production.up.railway.app';
