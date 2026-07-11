@@ -1,15 +1,29 @@
 import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoginScreen from './screens/LoginScreen';
 import PropiedadesScreen from './screens/PropiedadesScreen';
+import PropiedadDetalleScreen from './screens/PropiedadDetalleScreen';
+import PropiedadFormScreen from './screens/PropiedadFormScreen';
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
 function tabIcon(name) {
   return ({ color, size }) => <MaterialCommunityIcons name={name} color={color} size={size} />;
+}
+
+function PropiedadesStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="PropiedadesLista" component={PropiedadesScreen} options={{ title: 'Propiedades' }} />
+      <Stack.Screen name="PropiedadDetalle" component={PropiedadDetalleScreen} options={{ title: 'Propiedad' }} />
+      <Stack.Screen name="PropiedadForm" component={PropiedadFormScreen} options={{ title: 'Propiedad' }} />
+    </Stack.Navigator>
+  );
 }
 
 export default function App() {
@@ -25,10 +39,8 @@ export default function App() {
   return (
     <NavigationContainer>
       <Tab.Navigator screenOptions={{ headerShown: false, tabBarActiveTintColor: '#1a1a1a' }}>
-        <Tab.Screen name="Propiedades"
-          options={{ tabBarIcon: tabIcon('home-city') }}>
-          {() => <PropiedadesScreen usuario={usuario} onLogout={handleLogout} />}
-        </Tab.Screen>
+        <Tab.Screen name="Propiedades" component={PropiedadesStack}
+          options={{ tabBarIcon: tabIcon('home-city') }} />
       </Tab.Navigator>
     </NavigationContainer>
   );
