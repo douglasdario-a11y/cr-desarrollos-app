@@ -3,7 +3,7 @@ import { API } from './api';
 
 // Sube un archivo local (foto/video/documento) directo a R2 usando una URL
 // prefirmada que pide el backend — el archivo nunca pasa por el servidor.
-export async function subirArchivo({ propiedadId, uri, tipo, contentType }) {
+export async function subirArchivo({ propiedadId, uri, tipo, contentType, esPrincipal }) {
   const token = await AsyncStorage.getItem('token');
   const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
 
@@ -27,7 +27,7 @@ export async function subirArchivo({ propiedadId, uri, tipo, contentType }) {
   const resConfirmar = await fetch(`${API}/propiedades/${propiedadId}/media/confirmar`, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ key: solicitud.key, tipo }),
+    body: JSON.stringify({ key: solicitud.key, tipo, es_principal: !!esPrincipal }),
   });
   const media = await resConfirmar.json();
   if (!resConfirmar.ok) throw new Error(media.error || 'No se pudo guardar el archivo');

@@ -16,13 +16,19 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "config": {
+        "googleMaps": {
+          "apiKey": "PENDIENTE_REEMPLAZAR_CON_TU_API_KEY_DE_GOOGLE_MAPS"
+        }
       }
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-status-bar"
+      "expo-status-bar",
+      "expo-video"
     ],
     "extra": {
       "eas": {
