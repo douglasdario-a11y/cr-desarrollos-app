@@ -56,8 +56,8 @@ export default function PropiedadFormScreen({ route, navigation }) {
       <Text style={s.label}>Descripción</Text>
       <TextInput style={[s.input, s.textarea]} value={descripcion} onChangeText={setDescripcion} placeholder="Detalle de la propiedad" multiline />
 
-      <Text style={s.label}>Precio (USD)</Text>
-      <TextInput style={s.input} value={precio} onChangeText={setPrecio} placeholder="150000" keyboardType="numeric" />
+      <Text style={s.label}>Precio (₡ colones)</Text>
+      <TextInput style={s.input} value={precio} onChangeText={setPrecio} placeholder="75000000" keyboardType="numeric" />
 
       <Text style={s.label}>Ubicación</Text>
       <TextInput style={s.input} value={ubicacion} onChangeText={setUbicacion} placeholder="Escazú, San José" />

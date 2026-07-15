@@ -9,7 +9,7 @@ import { subirArchivo } from '../utils/upload';
 
 function fmtPrecio(n) {
   if (n == null) return 'Precio a consultar';
-  return `$${Number(n).toLocaleString('en-US')}`;
+  return `₡${Math.round(Number(n)).toLocaleString('es-CR')}`;
 }
 
 export default function PropiedadDetalleScreen({ route, navigation }) {
