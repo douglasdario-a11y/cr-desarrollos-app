@@ -21,7 +21,7 @@ function PropiedadesStack({ onLogout }) {
   return (
     <Stack.Navigator>
       <Stack.Screen name="PropiedadesLista" options={{ title: 'Propiedades' }}>
-        {() => <PropiedadesScreen onLogout={onLogout} />}
+        {(props) => <PropiedadesScreen {...props} onLogout={onLogout} />}
       </Stack.Screen>
       <Stack.Screen name="PropiedadDetalle" component={PropiedadDetalleScreen} options={{ title: 'Propiedad' }} />
       <Stack.Screen name="PropiedadForm" component={PropiedadFormScreen} options={{ title: 'Propiedad' }} />
