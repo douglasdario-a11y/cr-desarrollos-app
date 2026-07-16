@@ -34,7 +34,22 @@
         {
           "androidGoogleMapsApiKey": "AIzaSyDPsKFZjxR08RKRYDLnKSgNvEbxltt4e90"
         }
-      ]
+      ],
+      "expo-sharing",
+      [
+        "react-native-share",
+        {
+          "android": [
+            "com.whatsapp",
+            "com.google.android.gm"
+          ],
+          "ios": [
+            "whatsapp",
+            "gmail"
+          ]
+        }
+      ],
+      "expo-build-properties"
     ],
     "extra": {
       "eas": {

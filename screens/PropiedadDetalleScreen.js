@@ -9,6 +9,7 @@ import { useVideoPlayer, VideoView } from 'expo-video';
 import MapView, { Marker } from 'react-native-maps';
 import { API } from '../utils/api';
 import { subirArchivo } from '../utils/upload';
+import { compartirTexto, compartirArchivo, compartirArchivos } from '../utils/compartir';
 import { AMENIDADES, COCINA_OPCIONES, fmtColones, fmtM2 } from '../utils/caracteristicas';
 
 const ANCHO_PANTALLA = Dimensions.get('window').width;
@@ -115,11 +116,37 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
 
   function opcionesFoto(item) {
     const opciones = [
+      { text: 'Compartir', onPress: () => compartirArchivo(item.url).catch(e => Alert.alert('Error', e.message)) },
       ...(item.es_principal ? [] : [{ text: 'Marcar como principal', onPress: () => marcarPrincipal(item.id) }]),
       { text: 'Borrar', style: 'destructive', onPress: () => borrarMedia(item.id) },
       { text: 'Cancelar', style: 'cancel' },
     ];
     Alert.alert('Foto', '¿Qué quieres hacer?', opciones);
+  }
+
+  function resumenTexto() {
+    const c = propiedad.caracteristicas || {};
+    const partes = [
+      propiedad.titulo,
+      propiedad.tipo_propiedad,
+      propiedad.precio != null ? `Precio: ${fmtColones(propiedad.precio)}` : null,
+      c.habitaciones != null ? `${c.habitaciones} habitaciones` : null,
+      c.banos != null ? `${c.banos} baños` : null,
+      propiedad.descripcion,
+      propiedad.ubicacion ? `Ubicación: ${propiedad.ubicacion}` : null,
+      propiedad.maps_link,
+    ].filter(Boolean);
+    return partes.join('\n');
+  }
+
+  async function compartirTodasLasFotos() {
+    const fotos = (propiedad.media || []).filter(m => m.tipo === 'foto');
+    if (fotos.length === 0) { Alert.alert('Sin fotos', 'Todavía no hay fotos para compartir'); return; }
+    try {
+      await compartirArchivos(fotos.map(f => f.url));
+    } catch (e) {
+      Alert.alert('Error', e.message);
+    }
   }
 
   function confirmarBorrarPropiedad() {
@@ -190,12 +217,24 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
             <Text style={s.tipoChipText}>{propiedad.tipo_propiedad}</Text>
           </View>
         )}
-        <Text style={s.titulo}>{propiedad.titulo}</Text>
+        <View style={s.tituloFila}>
+          <Text style={[s.titulo, { flex: 1 }]}>{propiedad.titulo}</Text>
+          <TouchableOpacity style={s.btnCompartirChico} onPress={() => compartirTexto(resumenTexto())}>
+            <MaterialCommunityIcons name="share-variant" size={20} color="#3d1f0a" />
+          </TouchableOpacity>
+        </View>
         <View style={s.ubicacionFila}>
           <MaterialCommunityIcons name="map-marker" size={16} color="#7a5c3a" />
           <Text style={s.ubicacion}>{propiedad.ubicacion}</Text>
         </View>
-        {!!propiedad.descripcion && <Text style={s.descripcion}>{propiedad.descripcion}</Text>}
+        {!!propiedad.descripcion && (
+          <View style={s.descripcionFila}>
+            <Text style={[s.descripcion, { flex: 1 }]}>{propiedad.descripcion}</Text>
+            <TouchableOpacity onPress={() => compartirTexto(propiedad.descripcion)}>
+              <MaterialCommunityIcons name="share-variant" size={16} color="#7a5c3a" />
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Video */}
         <View style={s.seccion}>
@@ -255,7 +294,14 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
         {/* Mapa */}
         {(propiedad.lat != null || propiedad.maps_link) && (
           <View style={s.seccion}>
-            <Text style={s.seccionTitulo}>Ubicación en el mapa</Text>
+            <View style={s.seccionHeader}>
+              <Text style={s.seccionTitulo}>Ubicación en el mapa</Text>
+              {!!propiedad.maps_link && (
+                <TouchableOpacity onPress={() => compartirTexto(propiedad.maps_link)}>
+                  <MaterialCommunityIcons name="share-variant" size={16} color="#7a5c3a" />
+                </TouchableOpacity>
+              )}
+            </View>
             {propiedad.lat != null && propiedad.lng != null && (
               <MapView
                 style={s.mapa}
@@ -277,7 +323,8 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
           <Text style={s.btnSecundarioText}>Editar información</Text>
         </TouchableOpacity>
 
-        <SeccionMedia titulo={`Fotos (${fotos.length})`} items={fotos} onAgregar={() => elegirYSubir('foto')} onItemPress={opcionesFoto} subiendo={subiendo} tipoVisual="imagen" />
+        <SeccionMedia titulo={`Fotos (${fotos.length})`} items={fotos} onAgregar={() => elegirYSubir('foto')} onItemPress={opcionesFoto} subiendo={subiendo} tipoVisual="imagen"
+          extraAction={fotos.length > 0 ? { label: 'Compartir todas', onPress: compartirTodasLasFotos } : null} />
         <SeccionMedia titulo="Plano de catastro" items={planoCatastro ? [planoCatastro] : []} onAgregar={() => elegirYSubir('plano_catastro')} onItemPress={item => Alert.alert('Plano de catastro', '¿Borrar este archivo?', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Borrar', style: 'destructive', onPress: () => borrarMedia(item.id) }])} subiendo={subiendo} tipoVisual="imagen" single />
         <SeccionMedia titulo="Certificación de registro" items={certificacionRegistro ? [certificacionRegistro] : []} onAgregar={() => elegirYSubir('certificacion_registro')} onItemPress={item => Alert.alert('Certificación de registro', '¿Borrar este archivo?', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Borrar', style: 'destructive', onPress: () => borrarMedia(item.id) }])} subiendo={subiendo} tipoVisual="imagen" single />
         <SeccionMedia titulo={`Otros documentos (${documentos.length})`} items={documentos} onAgregar={() => elegirYSubir('documento')} onItemPress={item => Alert.alert('Documento', '¿Borrar este archivo?', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Borrar', style: 'destructive', onPress: () => borrarMedia(item.id) }])} subiendo={subiendo} tipoVisual="documento" />
@@ -295,7 +342,7 @@ function ReproductorVideo({ uri }) {
   return <VideoView style={s.video} player={player} allowsFullscreen nativeControls />;
 }
 
-function SeccionMedia({ titulo, items, onAgregar, onItemPress, subiendo, tipoVisual, single }) {
+function SeccionMedia({ titulo, items, onAgregar, onItemPress, subiendo, tipoVisual, single, extraAction }) {
   if (single && items.length > 0) {
     // Ya hay un archivo único (plano/certificación) — se muestra grande, sin botón de agregar otro.
     return (
@@ -312,11 +359,18 @@ function SeccionMedia({ titulo, items, onAgregar, onItemPress, subiendo, tipoVis
     <View style={s.seccion}>
       <View style={s.seccionHeader}>
         <Text style={s.seccionTitulo}>{titulo}</Text>
-        {!(single && items.length > 0) && (
-          <TouchableOpacity onPress={onAgregar} disabled={subiendo}>
-            <Text style={s.agregar}>{subiendo ? 'Subiendo…' : '+ Agregar'}</Text>
-          </TouchableOpacity>
-        )}
+        <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center' }}>
+          {extraAction && (
+            <TouchableOpacity onPress={extraAction.onPress}>
+              <Text style={s.agregar}>{extraAction.label}</Text>
+            </TouchableOpacity>
+          )}
+          {!(single && items.length > 0) && (
+            <TouchableOpacity onPress={onAgregar} disabled={subiendo}>
+              <Text style={s.agregar}>{subiendo ? 'Subiendo…' : '+ Agregar'}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
       {items.length === 0
         ? <Text style={s.vacio}>Todavía no hay nada aquí</Text>
@@ -346,9 +400,12 @@ const s = StyleSheet.create({
   tipoChip: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', backgroundColor: '#3d1f0a', borderRadius: 20, paddingVertical: 4, paddingHorizontal: 10, marginBottom: 8 },
   tipoChipText: { color: '#fff', fontSize: 12, fontWeight: '700' },
   titulo: { fontSize: 20, fontWeight: '700', color: '#1a1a1a' },
+  tituloFila: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
+  btnCompartirChico: { padding: 4 },
   ubicacionFila: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
   ubicacion: { fontSize: 14, color: '#7a5c3a' },
-  descripcion: { fontSize: 14, color: '#333', marginTop: 12, lineHeight: 20 },
+  descripcionFila: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: 12 },
+  descripcion: { fontSize: 14, color: '#333', lineHeight: 20 },
   video: { width: '100%', height: 220, borderRadius: 12, backgroundColor: '#000' },
   borrarVideo: { color: '#b3261e', fontWeight: '600', fontSize: 13, textAlign: 'center', marginTop: 8 },
   gridDatos: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 16 },
