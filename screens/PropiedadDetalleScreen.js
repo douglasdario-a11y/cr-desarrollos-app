@@ -36,33 +36,45 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
   useFocusEffect(useCallback(() => { cargar(); }, [id]));
 
   async function elegirYSubir(tipo) {
-    let archivo;
+    let archivos;
     if (tipo === 'video') {
       const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permiso.granted) { Alert.alert('Falta permiso', 'Necesito acceso a tus videos'); return; }
       const resultado = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['videos'], quality: 0.8 });
       if (resultado.canceled) return;
-      archivo = { uri: resultado.assets[0].uri, mimeType: resultado.assets[0].mimeType || 'video/mp4' };
-    } else if (tipo === 'foto' || tipo === 'plano_catastro' || tipo === 'certificacion_registro') {
+      archivos = [{ uri: resultado.assets[0].uri, mimeType: resultado.assets[0].mimeType || 'video/mp4' }];
+    } else if (tipo === 'foto') {
+      const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permiso.granted) { Alert.alert('Falta permiso', 'Necesito acceso a tus fotos'); return; }
+      // Fotos sí permite elegir varias de una vez — plano/certificación se
+      // quedan en selección única porque son un solo archivo por propiedad.
+      const resultado = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8, allowsMultipleSelection: true });
+      if (resultado.canceled) return;
+      archivos = resultado.assets.map(a => ({ uri: a.uri, mimeType: a.mimeType || 'image/jpeg' }));
+    } else if (tipo === 'plano_catastro' || tipo === 'certificacion_registro') {
       const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permiso.granted) { Alert.alert('Falta permiso', 'Necesito acceso a tus fotos'); return; }
       const resultado = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8 });
       if (resultado.canceled) return;
-      archivo = { uri: resultado.assets[0].uri, mimeType: resultado.assets[0].mimeType || 'image/jpeg' };
+      archivos = [{ uri: resultado.assets[0].uri, mimeType: resultado.assets[0].mimeType || 'image/jpeg' }];
     } else {
-      const resultado = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true });
+      const resultado = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true, multiple: true });
       if (resultado.canceled) return;
-      archivo = { uri: resultado.assets[0].uri, mimeType: resultado.assets[0].mimeType };
+      archivos = resultado.assets.map(a => ({ uri: a.uri, mimeType: a.mimeType }));
     }
-    await subir(archivo, tipo);
+    await subir(archivos, tipo);
   }
 
-  async function subir(archivo, tipo) {
+  async function subir(archivos, tipo) {
     setSubiendo(true);
     try {
-      const contentType = archivo.mimeType || (tipo === 'video' ? 'video/mp4' : 'image/jpeg');
-      const esPrimeraFoto = tipo === 'foto' && !(propiedad.media || []).some(m => m.tipo === 'foto');
-      await subirArchivo({ propiedadId: id, uri: archivo.uri, tipo, contentType, esPrincipal: esPrimeraFoto });
+      let yaHayFoto = tipo === 'foto' && (propiedad.media || []).some(m => m.tipo === 'foto');
+      for (const archivo of archivos) {
+        const contentType = archivo.mimeType || (tipo === 'video' ? 'video/mp4' : 'image/jpeg');
+        const esPrincipal = tipo === 'foto' && !yaHayFoto;
+        await subirArchivo({ propiedadId: id, uri: archivo.uri, tipo, contentType, esPrincipal });
+        yaHayFoto = true;
+      }
       await cargar();
     } catch (e) {
       Alert.alert('Error', e.message);
