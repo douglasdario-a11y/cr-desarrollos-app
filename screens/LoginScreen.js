@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API } from '../utils/api';
@@ -7,6 +7,10 @@ export default function LoginScreen({ onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem('ultimo_correo').then(guardado => { if (guardado) setEmail(guardado); });
+  }, []);
 
   async function login() {
     if (!email || !password) { Alert.alert('Error', 'Ingresá tu correo y contraseña'); return; }
@@ -21,6 +25,7 @@ export default function LoginScreen({ onLogin }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Credenciales inválidas');
       await AsyncStorage.setItem('token', data.token);
+      await AsyncStorage.setItem('ultimo_correo', email);
       onLogin(data);
     } catch (e) {
       Alert.alert('Error', e.message);

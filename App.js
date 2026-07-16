@@ -8,6 +8,7 @@ import LoginScreen from './screens/LoginScreen';
 import PropiedadesScreen from './screens/PropiedadesScreen';
 import PropiedadDetalleScreen from './screens/PropiedadDetalleScreen';
 import PropiedadFormScreen from './screens/PropiedadFormScreen';
+import CambiarPasswordScreen from './screens/CambiarPasswordScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -16,12 +17,15 @@ function tabIcon(name) {
   return ({ color, size }) => <MaterialCommunityIcons name={name} color={color} size={size} />;
 }
 
-function PropiedadesStack() {
+function PropiedadesStack({ onLogout }) {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="PropiedadesLista" component={PropiedadesScreen} options={{ title: 'Propiedades' }} />
+      <Stack.Screen name="PropiedadesLista" options={{ title: 'Propiedades' }}>
+        {() => <PropiedadesScreen onLogout={onLogout} />}
+      </Stack.Screen>
       <Stack.Screen name="PropiedadDetalle" component={PropiedadDetalleScreen} options={{ title: 'Propiedad' }} />
       <Stack.Screen name="PropiedadForm" component={PropiedadFormScreen} options={{ title: 'Propiedad' }} />
+      <Stack.Screen name="CambiarPassword" component={CambiarPasswordScreen} options={{ title: 'Cambiar contraseña' }} />
     </Stack.Navigator>
   );
 }
@@ -39,8 +43,9 @@ export default function App() {
   return (
     <NavigationContainer>
       <Tab.Navigator screenOptions={{ headerShown: false, tabBarActiveTintColor: '#1a1a1a' }}>
-        <Tab.Screen name="Propiedades" component={PropiedadesStack}
-          options={{ tabBarIcon: tabIcon('home-city') }} />
+        <Tab.Screen name="Propiedades" options={{ tabBarIcon: tabIcon('home-city') }}>
+          {() => <PropiedadesStack onLogout={handleLogout} />}
+        </Tab.Screen>
       </Tab.Navigator>
     </NavigationContainer>
   );

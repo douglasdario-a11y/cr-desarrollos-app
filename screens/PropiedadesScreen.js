@@ -1,7 +1,8 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, Image, FlatList, StyleSheet, RefreshControl, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, Image, FlatList, StyleSheet, RefreshControl, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { API } from '../utils/api';
 
 function fmtPrecio(n) {
@@ -9,7 +10,7 @@ function fmtPrecio(n) {
   return `₡${Math.round(Number(n)).toLocaleString('es-CR')}`;
 }
 
-export default function PropiedadesScreen({ navigation }) {
+export default function PropiedadesScreen({ navigation, onLogout }) {
   const [propiedades, setPropiedades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
@@ -38,9 +39,18 @@ export default function PropiedadesScreen({ navigation }) {
     <View style={s.container}>
       <View style={s.header}>
         <Text style={s.headerTitulo}>Propiedades</Text>
-        <TouchableOpacity style={s.btnNueva} onPress={() => navigation.navigate('PropiedadForm')}>
-          <Text style={s.btnNuevaText}>+ Nueva</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+          <TouchableOpacity onPress={() => Alert.alert('Cuenta', '¿Qué quieres hacer?', [
+            { text: 'Cambiar contraseña', onPress: () => navigation.navigate('CambiarPassword') },
+            { text: 'Cerrar sesión', style: 'destructive', onPress: onLogout },
+            { text: 'Cancelar', style: 'cancel' },
+          ])}>
+            <MaterialCommunityIcons name="cog" size={24} color="#3d1f0a" />
+          </TouchableOpacity>
+          <TouchableOpacity style={s.btnNueva} onPress={() => navigation.navigate('PropiedadForm')}>
+            <Text style={s.btnNuevaText}>+ Nueva</Text>
+          </TouchableOpacity>
+        </View>
       </View>
       <FlatList
         data={propiedades}
