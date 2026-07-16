@@ -28,7 +28,13 @@
     },
     "plugins": [
       "expo-status-bar",
-      "expo-video"
+      "expo-video",
+      [
+        "react-native-maps",
+        {
+          "androidGoogleMapsApiKey": "AIzaSyDPsKFZjxR08RKRYDLnKSgNvEbxltt4e90"
+        }
+      ]
     ],
     "extra": {
       "eas": {
