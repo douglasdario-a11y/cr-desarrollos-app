@@ -238,7 +238,7 @@ export default function PropiedadFormScreen({ route, navigation }) {
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f0eb' },
   label: { fontSize: 13, fontWeight: '600', color: '#7a5c3a', marginBottom: 6, marginTop: 16 },
-  input: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 10, padding: 12, fontSize: 15 },
+  input: { backgroundColor: '#fff', color: '#1a1a1a', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 10, padding: 12, fontSize: 15 },
   textarea: { minHeight: 80, textAlignVertical: 'top' },
   fila: { flexDirection: 'row', gap: 10 },
   filaItem: { flex: 1 },

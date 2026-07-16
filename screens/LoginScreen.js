@@ -41,6 +41,7 @@ export default function LoginScreen({ onLogin }) {
         <TextInput
           style={s.input}
           placeholder="Correo"
+          placeholderTextColor="#9a8674"
           autoCapitalize="none"
           keyboardType="email-address"
           value={email}
@@ -49,6 +50,7 @@ export default function LoginScreen({ onLogin }) {
         <TextInput
           style={s.input}
           placeholder="Contraseña"
+          placeholderTextColor="#9a8674"
           secureTextEntry
           value={password}
           onChangeText={setPassword}
@@ -68,7 +70,7 @@ const s = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, backgroundColor: '#f5f0eb' },
   title: { fontSize: 20, fontWeight: '700', color: '#1a1a1a', marginBottom: 24, textAlign: 'center' },
   card: { backgroundColor: '#fff', borderRadius: 16, padding: 20, width: '100%', maxWidth: 360, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 12, elevation: 4 },
-  input: { borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 10, padding: 12, fontSize: 15, marginBottom: 12 },
+  input: { backgroundColor: '#fff', color: '#1a1a1a', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 10, padding: 12, fontSize: 15, marginBottom: 12 },
   btn: { backgroundColor: '#1a1a1a', borderRadius: 10, padding: 14, alignItems: 'center' },
   btnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });
