@@ -1,5 +1,9 @@
 import { Share } from 'react-native';
-import * as FileSystem from 'expo-file-system';
+// La API "legacy" es la que sigue teniendo cacheDirectory/getInfoAsync/
+// downloadAsync tal cual — desde SDK 57 expo-file-system tiene una API nueva
+// basada en clases (File/Directory) y estos métodos quedaron marcados como
+// obsoletos en el import por defecto.
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import ShareMenu from 'react-native-share';
 
