@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, FlatList, Dimensions, Linking } from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, FlatList, Dimensions, Linking, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -19,6 +19,7 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
   const [propiedad, setPropiedad] = useState(null);
   const [loading, setLoading] = useState(true);
   const [subiendo, setSubiendo] = useState(false);
+  const [fotoVisible, setFotoVisible] = useState(null);
 
   async function cargar() {
     try {
@@ -114,14 +115,11 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
     }
   }
 
-  function opcionesFoto(item) {
-    const opciones = [
-      { text: 'Compartir', onPress: () => compartirArchivo(item.url).catch(e => Alert.alert('Error', e.message)) },
-      ...(item.es_principal ? [] : [{ text: 'Marcar como principal', onPress: () => marcarPrincipal(item.id) }]),
-      { text: 'Borrar', style: 'destructive', onPress: () => borrarMedia(item.id) },
+  function confirmarBorrarFoto(item) {
+    Alert.alert('Borrar foto', '¿Seguro que quieres borrar esta foto?', [
       { text: 'Cancelar', style: 'cancel' },
-    ];
-    Alert.alert('Foto', '¿Qué quieres hacer?', opciones);
+      { text: 'Borrar', style: 'destructive', onPress: () => { setFotoVisible(null); borrarMedia(item.id); } },
+    ]);
   }
 
   function resumenTexto() {
@@ -174,7 +172,6 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
   const media = propiedad.media || [];
   const fotos = media.filter(m => m.tipo === 'foto');
   const principales = fotos.filter(m => m.es_principal);
-  const otrasFotos = fotos.filter(m => !m.es_principal);
   const fotosPortada = principales.length ? principales : fotos.slice(0, 1);
   const video = media.find(m => m.tipo === 'video');
   const documentos = media.filter(m => m.tipo === 'documento');
@@ -194,6 +191,7 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
   ].filter(d => d.valor != null && d.valor !== '');
 
   return (
+    <>
     <ScrollView style={s.container}>
       {/* Fotos principales */}
       {fotosPortada.length > 0 && (
@@ -203,7 +201,7 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
           data={fotosPortada}
           keyExtractor={item => String(item.id)}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => opcionesFoto(item)}>
+            <TouchableOpacity onPress={() => setFotoVisible(item)}>
               <Image source={{ uri: item.url }} style={s.fotoPortada} />
             </TouchableOpacity>
           )}
@@ -323,7 +321,7 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
           <Text style={s.btnSecundarioText}>Editar información</Text>
         </TouchableOpacity>
 
-        <SeccionMedia titulo={`Fotos (${fotos.length})`} items={fotos} onAgregar={() => elegirYSubir('foto')} onItemPress={opcionesFoto} subiendo={subiendo} tipoVisual="imagen"
+        <SeccionMedia titulo={`Fotos (${fotos.length})`} items={fotos} onAgregar={() => elegirYSubir('foto')} onItemPress={item => setFotoVisible(item)} subiendo={subiendo} tipoVisual="imagen"
           extraAction={fotos.length > 0 ? { label: 'Compartir todas', onPress: compartirTodasLasFotos } : null} />
         <SeccionMedia titulo="Plano de catastro" items={planoCatastro ? [planoCatastro] : []} onAgregar={() => elegirYSubir('plano_catastro')} onItemPress={item => Alert.alert('Plano de catastro', '¿Borrar este archivo?', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Borrar', style: 'destructive', onPress: () => borrarMedia(item.id) }])} subiendo={subiendo} tipoVisual="imagen" single />
         <SeccionMedia titulo="Certificación de registro" items={certificacionRegistro ? [certificacionRegistro] : []} onAgregar={() => elegirYSubir('certificacion_registro')} onItemPress={item => Alert.alert('Certificación de registro', '¿Borrar este archivo?', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Borrar', style: 'destructive', onPress: () => borrarMedia(item.id) }])} subiendo={subiendo} tipoVisual="imagen" single />
@@ -334,6 +332,34 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
         </TouchableOpacity>
       </View>
     </ScrollView>
+
+    <Modal visible={!!fotoVisible} transparent animationType="fade" onRequestClose={() => setFotoVisible(null)}>
+      <View style={s.visorFondo}>
+        <TouchableOpacity style={s.visorCerrar} onPress={() => setFotoVisible(null)}>
+          <MaterialCommunityIcons name="close" size={28} color="#fff" />
+        </TouchableOpacity>
+        {fotoVisible && <Image source={{ uri: fotoVisible.url }} style={s.visorImagen} resizeMode="contain" />}
+        {fotoVisible && (
+          <View style={s.visorAcciones}>
+            <TouchableOpacity style={s.visorBoton} onPress={() => compartirArchivo(fotoVisible.url).catch(e => Alert.alert('Error', e.message))}>
+              <MaterialCommunityIcons name="share-variant" size={20} color="#fff" />
+              <Text style={s.visorBotonText}>Compartir</Text>
+            </TouchableOpacity>
+            {!fotoVisible.es_principal && (
+              <TouchableOpacity style={s.visorBoton} onPress={() => { marcarPrincipal(fotoVisible.id); setFotoVisible(null); }}>
+                <MaterialCommunityIcons name="star-outline" size={20} color="#fff" />
+                <Text style={s.visorBotonText}>Principal</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity style={s.visorBoton} onPress={() => confirmarBorrarFoto(fotoVisible)}>
+              <MaterialCommunityIcons name="trash-can-outline" size={20} color="#fff" />
+              <Text style={s.visorBotonText}>Borrar</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    </Modal>
+    </>
   );
 }
 
@@ -431,4 +457,10 @@ const s = StyleSheet.create({
   imagenGrande: { width: '100%', height: 200, borderRadius: 12 },
   btnPeligro: { marginTop: 32, marginBottom: 40, alignItems: 'center', padding: 12 },
   btnPeligroText: { color: '#b3261e', fontWeight: '600' },
+  visorFondo: { flex: 1, backgroundColor: 'rgba(0,0,0,0.92)', justifyContent: 'center' },
+  visorCerrar: { position: 'absolute', top: 48, right: 20, zIndex: 1, padding: 8 },
+  visorImagen: { width: '100%', height: '75%' },
+  visorAcciones: { flexDirection: 'row', justifyContent: 'space-evenly', paddingVertical: 24 },
+  visorBoton: { alignItems: 'center', gap: 6 },
+  visorBotonText: { color: '#fff', fontSize: 12, fontWeight: '600' },
 });
