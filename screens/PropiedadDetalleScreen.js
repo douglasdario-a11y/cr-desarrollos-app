@@ -116,7 +116,7 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
   }
 
   function confirmarBorrarFoto(item) {
-    Alert.alert('Borrar foto', '¿Seguro que quieres borrar esta foto?', [
+    Alert.alert('Borrar archivo', '¿Seguro que quieres borrar este archivo?', [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Borrar', style: 'destructive', onPress: () => { setFotoVisible(null); borrarMedia(item.id); } },
     ]);
@@ -323,8 +323,8 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
 
         <SeccionMedia titulo={`Fotos (${fotos.length})`} items={fotos} onAgregar={() => elegirYSubir('foto')} onItemPress={item => setFotoVisible(item)} subiendo={subiendo} tipoVisual="imagen"
           extraAction={fotos.length > 0 ? { label: 'Compartir todas', onPress: compartirTodasLasFotos } : null} />
-        <SeccionMedia titulo="Plano de catastro" items={planoCatastro ? [planoCatastro] : []} onAgregar={() => elegirYSubir('plano_catastro')} onItemPress={item => Alert.alert('Plano de catastro', '¿Borrar este archivo?', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Borrar', style: 'destructive', onPress: () => borrarMedia(item.id) }])} subiendo={subiendo} tipoVisual="imagen" single />
-        <SeccionMedia titulo="Certificación de registro" items={certificacionRegistro ? [certificacionRegistro] : []} onAgregar={() => elegirYSubir('certificacion_registro')} onItemPress={item => Alert.alert('Certificación de registro', '¿Borrar este archivo?', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Borrar', style: 'destructive', onPress: () => borrarMedia(item.id) }])} subiendo={subiendo} tipoVisual="imagen" single />
+        <SeccionMedia titulo="Plano de catastro" items={planoCatastro ? [planoCatastro] : []} onAgregar={() => elegirYSubir('plano_catastro')} onItemPress={item => setFotoVisible(item)} subiendo={subiendo} tipoVisual="imagen" single />
+        <SeccionMedia titulo="Certificación de registro" items={certificacionRegistro ? [certificacionRegistro] : []} onAgregar={() => elegirYSubir('certificacion_registro')} onItemPress={item => setFotoVisible(item)} subiendo={subiendo} tipoVisual="imagen" single />
         <SeccionMedia titulo={`Otros documentos (${documentos.length})`} items={documentos} onAgregar={() => elegirYSubir('documento')} onItemPress={item => Alert.alert('Documento', '¿Borrar este archivo?', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Borrar', style: 'destructive', onPress: () => borrarMedia(item.id) }])} subiendo={subiendo} tipoVisual="documento" />
 
         <TouchableOpacity style={s.btnPeligro} onPress={confirmarBorrarPropiedad}>
@@ -345,7 +345,7 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
               <MaterialCommunityIcons name="share-variant" size={20} color="#fff" />
               <Text style={s.visorBotonText}>Compartir</Text>
             </TouchableOpacity>
-            {!fotoVisible.es_principal && (
+            {fotoVisible.tipo === 'foto' && !fotoVisible.es_principal && (
               <TouchableOpacity style={s.visorBoton} onPress={() => { marcarPrincipal(fotoVisible.id); setFotoVisible(null); }}>
                 <MaterialCommunityIcons name="star-outline" size={20} color="#fff" />
                 <Text style={s.visorBotonText}>Principal</Text>
