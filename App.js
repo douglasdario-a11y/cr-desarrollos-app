@@ -8,7 +8,7 @@ import LoginScreen from './screens/LoginScreen';
 import PropiedadesScreen from './screens/PropiedadesScreen';
 import PropiedadDetalleScreen from './screens/PropiedadDetalleScreen';
 import PropiedadFormScreen from './screens/PropiedadFormScreen';
-import CambiarPasswordScreen from './screens/CambiarPasswordScreen';
+import CambiarPinScreen from './screens/CambiarPinScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -25,7 +25,7 @@ function PropiedadesStack({ onLogout }) {
       </Stack.Screen>
       <Stack.Screen name="PropiedadDetalle" component={PropiedadDetalleScreen} options={{ title: 'Propiedad' }} />
       <Stack.Screen name="PropiedadForm" component={PropiedadFormScreen} options={{ title: 'Propiedad' }} />
-      <Stack.Screen name="CambiarPassword" component={CambiarPasswordScreen} options={{ title: 'Cambiar contraseña' }} />
+      <Stack.Screen name="CambiarPin" component={CambiarPinScreen} options={{ title: 'Cambiar PIN' }} />
     </Stack.Navigator>
   );
 }

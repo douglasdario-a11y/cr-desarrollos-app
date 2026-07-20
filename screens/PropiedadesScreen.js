@@ -41,7 +41,7 @@ export default function PropiedadesScreen({ navigation, onLogout }) {
         <Text style={s.headerTitulo}>Propiedades</Text>
         <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
           <TouchableOpacity onPress={() => Alert.alert('Cuenta', '¿Qué quieres hacer?', [
-            { text: 'Cambiar contraseña', onPress: () => navigation.navigate('CambiarPassword') },
+            { text: 'Cambiar PIN', onPress: () => navigation.navigate('CambiarPin') },
             { text: 'Cerrar sesión', style: 'destructive', onPress: onLogout },
             { text: 'Cancelar', style: 'cancel' },
           ])}>
