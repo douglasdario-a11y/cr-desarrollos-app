@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, Alert, RefreshControl, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { API } from '../utils/api';
@@ -11,6 +11,12 @@ const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', '
 
 function aClaveFecha(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function tituloDia(clave) {
+  if (!clave) return '';
+  const [anio, mes, dia] = clave.split('-').map(Number);
+  return `${dia} de ${MESES[mes - 1]} ${anio}`;
 }
 
 function generarDiasMes(mesActual) {
@@ -29,6 +35,7 @@ export default function CitasScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
   const [mesActual, setMesActual] = useState(() => { const d = new Date(); d.setDate(1); return d; });
+  const [diaSeleccionado, setDiaSeleccionado] = useState(null);
 
   async function cargar() {
     try {
@@ -88,8 +95,12 @@ export default function CitasScreen({ navigation }) {
 
   const dias = generarDiasMes(mesActual);
   const hoyClave = aClaveFecha(new Date());
+  const citasDelDia = diaSeleccionado
+    ? (porDia[diaSeleccionado] || []).slice().sort((a, b) => a.fecha_hora.localeCompare(b.fecha_hora))
+    : [];
 
   return (
+    <>
     <ScrollView
       style={s.container}
       contentContainerStyle={{ padding: 16 }}
@@ -124,7 +135,10 @@ export default function CitasScreen({ navigation }) {
               <View key={i} style={s.calCelda}>
                 <TouchableOpacity
                   style={[s.calDia, clave === hoyClave && s.calDiaHoy]}
-                  onPress={() => navigation.navigate('CitaForm', { fecha: clave })}
+                  onPress={() => {
+                    if (citasDia.length > 0) setDiaSeleccionado(clave);
+                    else navigation.navigate('CitaForm', { fecha: clave });
+                  }}
                 >
                   <Text style={s.calDiaTexto}>{dia.getDate()}</Text>
                   {citasDia.length > 0 && (
@@ -142,6 +156,50 @@ export default function CitasScreen({ navigation }) {
       <SeccionCitas titulo="Historial" citas={historial} vacio="Todavía no hay citas hechas o canceladas."
         onCambiarEstado={cambiarEstado} onBorrar={confirmarBorrar} navigation={navigation} />
     </ScrollView>
+
+    <Modal
+      visible={!!diaSeleccionado}
+      transparent
+      animationType="slide"
+      onRequestClose={() => setDiaSeleccionado(null)}
+    >
+      <View style={s.modalFondo}>
+        <View style={s.modalContenido}>
+          <Text style={s.modalTitulo}>{tituloDia(diaSeleccionado)}</Text>
+          <ScrollView style={{ maxHeight: 320 }}>
+            {citasDelDia.map(c => {
+              const est = estadoCita(c.estado);
+              return (
+                <TouchableOpacity
+                  key={c.id}
+                  style={s.modalFila}
+                  onPress={() => { setDiaSeleccionado(null); navigation.navigate('CitaForm', { cita: c }); }}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.fecha}>{fmtFechaHora(c.fecha_hora)}</Text>
+                    <View style={s.detalleFila}>
+                      {!!c.nombre_cliente && <Text style={s.detalle}>👤 {c.nombre_cliente}</Text>}
+                      {!!c.propiedad_titulo && <Text style={s.detalle}>🏠 {c.propiedad_titulo}</Text>}
+                    </View>
+                  </View>
+                  <View style={[s.estadoChip, { backgroundColor: est.color }]}><Text style={s.estadoChipText}>{est.label}</Text></View>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+          <TouchableOpacity
+            style={s.btnNuevaModal}
+            onPress={() => { const f = diaSeleccionado; setDiaSeleccionado(null); navigation.navigate('CitaForm', { fecha: f }); }}
+          >
+            <Text style={s.btnNuevaText}>+ Nueva cita este día</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={s.btnCerrarModal} onPress={() => setDiaSeleccionado(null)}>
+            <Text style={s.btnCerrarModalText}>Cerrar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+    </>
   );
 }
 
@@ -222,4 +280,11 @@ const s = StyleSheet.create({
   btnAccionText: { fontSize: 12, fontWeight: '600', color: '#3d1f0a' },
   btnAccionCancelarText: { fontSize: 12, fontWeight: '600', color: '#b3261e' },
   btnBorrarText: { fontSize: 12, fontWeight: '600', color: '#b3261e' },
+  modalFondo: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
+  modalContenido: { backgroundColor: '#f5f0eb', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, paddingBottom: 30 },
+  modalTitulo: { fontSize: 17, fontWeight: '700', color: '#1a1a1a', marginBottom: 14, textTransform: 'capitalize' },
+  modalFila: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 10, gap: 10 },
+  btnNuevaModal: { backgroundColor: '#1a1a1a', borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 14 },
+  btnCerrarModal: { alignItems: 'center', padding: 12, marginTop: 6 },
+  btnCerrarModalText: { color: '#7a5c3a', fontWeight: '600', fontSize: 13 },
 });
