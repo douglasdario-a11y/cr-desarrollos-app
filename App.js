@@ -9,6 +9,14 @@ import PropiedadesScreen from './screens/PropiedadesScreen';
 import PropiedadDetalleScreen from './screens/PropiedadDetalleScreen';
 import PropiedadFormScreen from './screens/PropiedadFormScreen';
 import CambiarPinScreen from './screens/CambiarPinScreen';
+import ClientesScreen from './screens/ClientesScreen';
+import ClienteFormScreen from './screens/ClienteFormScreen';
+import PropietariosScreen from './screens/PropietariosScreen';
+import PropietarioFormScreen from './screens/PropietarioFormScreen';
+import CitasScreen from './screens/CitasScreen';
+import CitaFormScreen from './screens/CitaFormScreen';
+import UsuariosScreen from './screens/UsuariosScreen';
+import UsuarioFormScreen from './screens/UsuarioFormScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -30,6 +38,42 @@ function PropiedadesStack({ onLogout }) {
   );
 }
 
+function ClientesStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="ClientesLista" component={ClientesScreen} options={{ title: 'Clientes' }} />
+      <Stack.Screen name="ClienteForm" component={ClienteFormScreen} options={{ title: 'Cliente' }} />
+    </Stack.Navigator>
+  );
+}
+
+function PropietariosStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="PropietariosLista" component={PropietariosScreen} options={{ title: 'Propietarios' }} />
+      <Stack.Screen name="PropietarioForm" component={PropietarioFormScreen} options={{ title: 'Propietario' }} />
+    </Stack.Navigator>
+  );
+}
+
+function CitasStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="CitasLista" component={CitasScreen} options={{ title: 'Citas' }} />
+      <Stack.Screen name="CitaForm" component={CitaFormScreen} options={{ title: 'Cita' }} />
+    </Stack.Navigator>
+  );
+}
+
+function UsuariosStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="UsuariosLista" component={UsuariosScreen} options={{ title: 'Usuarios' }} />
+      <Stack.Screen name="UsuarioForm" component={UsuarioFormScreen} options={{ title: 'Usuario' }} />
+    </Stack.Navigator>
+  );
+}
+
 export default function App() {
   const [usuario, setUsuario] = useState(null);
 
@@ -46,6 +90,10 @@ export default function App() {
         <Tab.Screen name="Propiedades" options={{ tabBarIcon: tabIcon('home-city') }}>
           {() => <PropiedadesStack onLogout={handleLogout} />}
         </Tab.Screen>
+        <Tab.Screen name="Clientes" component={ClientesStack} options={{ tabBarIcon: tabIcon('account-multiple') }} />
+        <Tab.Screen name="Propietarios" component={PropietariosStack} options={{ tabBarIcon: tabIcon('account-tie') }} />
+        <Tab.Screen name="Citas" component={CitasStack} options={{ tabBarIcon: tabIcon('calendar-month') }} />
+        <Tab.Screen name="Usuarios" component={UsuariosStack} options={{ tabBarIcon: tabIcon('key-variant') }} />
       </Tab.Navigator>
     </NavigationContainer>
   );
