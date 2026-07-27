@@ -221,6 +221,11 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
           <MaterialCommunityIcons name="map-marker" size={16} color="#7a5c3a" />
           <Text style={s.ubicacion}>{propiedad.ubicacion}</Text>
         </View>
+        {(propiedad.distrito || propiedad.canton || propiedad.provincia) && (
+          <Text style={s.ubicacionAdmin}>
+            {[propiedad.distrito, propiedad.canton, propiedad.provincia].filter(Boolean).join(', ')}
+          </Text>
+        )}
         {!!propiedad.descripcion && (
           <View style={s.descripcionFila}>
             <Text style={[s.descripcion, { flex: 1 }]}>{propiedad.descripcion}</Text>
@@ -422,6 +427,7 @@ const s = StyleSheet.create({
   tituloFila: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
   btnCompartirChico: { padding: 4 },
   ubicacionFila: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
+  ubicacionAdmin: { fontSize: 12, color: '#9a8674', marginTop: 2, marginLeft: 20 },
   ubicacion: { fontSize: 14, color: '#7a5c3a' },
   descripcionFila: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: 12 },
   descripcion: { fontSize: 14, color: '#333', lineHeight: 20 },

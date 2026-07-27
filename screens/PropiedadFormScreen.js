@@ -5,6 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { API } from '../utils/api';
 import { ESPACIOS, COCINA_OPCIONES, AMENIDADES_SUGERIDAS, amenidadesEfectivas, espaciosPersonalizados } from '../utils/caracteristicas';
+import { PROVINCIAS, cantonesDe, distritosDe } from '../utils/ubicacionCR';
 
 export default function PropiedadFormScreen({ route, navigation }) {
   const existente = route.params?.propiedad;
@@ -18,6 +19,9 @@ export default function PropiedadFormScreen({ route, navigation }) {
   const [precioAlquiler, setPrecioAlquiler] = useState(existente?.precio_alquiler ? String(existente.precio_alquiler) : '');
   const [valorFiscal, setValorFiscal] = useState(existente?.valor_fiscal ? String(existente.valor_fiscal) : '');
   const [ubicacion, setUbicacion] = useState(existente?.ubicacion || '');
+  const [provincia, setProvincia] = useState(existente?.provincia || '');
+  const [canton, setCanton] = useState(existente?.canton || '');
+  const [distrito, setDistrito] = useState(existente?.distrito || '');
   const [mapsLink, setMapsLink] = useState(existente?.maps_link || '');
   const [nisAgua, setNisAgua] = useState(existente?.nis_agua || '');
   const [nisElectricidad, setNisElectricidad] = useState(existente?.nis_electricidad || '');
@@ -77,6 +81,21 @@ export default function PropiedadFormScreen({ route, navigation }) {
     }
   }
 
+  function cambiarProvincia(val) {
+    setProvincia(val === provincia ? '' : val);
+    setCanton('');
+    setDistrito('');
+  }
+
+  function cambiarCanton(val) {
+    setCanton(val === canton ? '' : val);
+    setDistrito('');
+  }
+
+  function cambiarDistrito(val) {
+    setDistrito(val === distrito ? '' : val);
+  }
+
   function toggleEspacio(key) {
     setEspacios(prev => ({ ...prev, [key]: !prev[key] }));
   }
@@ -117,6 +136,9 @@ export default function PropiedadFormScreen({ route, navigation }) {
         precio_alquiler: precioAlquiler ? Number(precioAlquiler) : null,
         valor_fiscal: valorFiscal ? Number(valorFiscal) : null,
         ubicacion: ubicacion.trim() || null,
+        provincia: provincia || null,
+        canton: canton || null,
+        distrito: distrito || null,
         maps_link: mapsLink.trim() || null,
         nis_agua: nisAgua.trim() || null,
         nis_electricidad: nisElectricidad.trim() || null,
@@ -223,6 +245,41 @@ export default function PropiedadFormScreen({ route, navigation }) {
 
       <Text style={s.label}>Ubicación</Text>
       <TextInput style={s.input} value={ubicacion} onChangeText={setUbicacion} placeholder="Escazú, San José" />
+
+      <Text style={s.label}>Provincia</Text>
+      <View style={s.chips}>
+        {PROVINCIAS.map(p => (
+          <TouchableOpacity key={p} style={[s.chip, provincia === p && s.chipActivo]} onPress={() => cambiarProvincia(p)}>
+            <Text style={[s.chipText, provincia === p && s.chipTextActivo]}>{p}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {!!provincia && (
+        <>
+          <Text style={s.label}>Cantón</Text>
+          <View style={s.chips}>
+            {cantonesDe(provincia).map(c2 => (
+              <TouchableOpacity key={c2} style={[s.chip, canton === c2 && s.chipActivo]} onPress={() => cambiarCanton(c2)}>
+                <Text style={[s.chipText, canton === c2 && s.chipTextActivo]}>{c2}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </>
+      )}
+
+      {!!canton && (
+        <>
+          <Text style={s.label}>Distrito</Text>
+          <View style={s.chips}>
+            {distritosDe(provincia, canton).map(d => (
+              <TouchableOpacity key={d} style={[s.chip, distrito === d && s.chipActivo]} onPress={() => cambiarDistrito(d)}>
+                <Text style={[s.chipText, distrito === d && s.chipTextActivo]}>{d}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </>
+      )}
 
       <Text style={s.label}>Link de Google Maps</Text>
       <TextInput
