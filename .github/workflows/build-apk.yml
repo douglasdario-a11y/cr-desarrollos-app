@@ -46,6 +46,9 @@ jobs:
               -dname "CN=Android Debug,O=Android,C=US"
           fi
 
+      - name: Print keystore SHA-1 (para Google Maps API key restrictions)
+        run: keytool -list -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey | grep "SHA1:"
+
       - name: Prebuild native Android project
         run: npx expo prebuild --platform android --no-install
 
