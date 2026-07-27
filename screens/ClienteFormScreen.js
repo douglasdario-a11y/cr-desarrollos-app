@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { API } from '../utils/api';
 import { ETAPAS_CLIENTE } from '../utils/crm';
+import { sincronizarContacto, elegirDeContactos } from '../utils/contactosSync';
 
 export default function ClienteFormScreen({ route, navigation }) {
   const existente = route.params?.cliente;
@@ -37,14 +38,23 @@ export default function ClienteFormScreen({ route, navigation }) {
 
   useFocusEffect(useCallback(() => { cargarListas(); }, []));
 
+  async function alElegirDeContactos() {
+    const contacto = await elegirDeContactos();
+    if (!contacto) return;
+    if (contacto.nombre) setNombreCliente(contacto.nombre);
+    if (contacto.telefono) setTelefono(contacto.telefono);
+  }
+
   async function guardar() {
     if (!nombreCliente.trim()) { Alert.alert('Error', 'El nombre es requerido'); return; }
     setGuardando(true);
     try {
       const token = await AsyncStorage.getItem('token');
+      const nombreFinal = nombreCliente.trim();
+      const telefonoFinal = telefono.trim();
       const body = {
-        nombre_cliente: nombreCliente.trim(),
-        telefono: telefono.trim() || null,
+        nombre_cliente: nombreFinal,
+        telefono: telefonoFinal || null,
         email: email.trim() || null,
         propiedad_id: propiedadId || null,
         etapa,
@@ -59,6 +69,7 @@ export default function ClienteFormScreen({ route, navigation }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error guardando el cliente');
+      sincronizarContacto(editando ? existente.id : data.id, nombreFinal, telefonoFinal);
       navigation.goBack();
     } catch (e) {
       Alert.alert('Error', e.message);
@@ -69,6 +80,10 @@ export default function ClienteFormScreen({ route, navigation }) {
 
   return (
     <ScrollView style={s.container} contentContainerStyle={{ padding: 16 }}>
+      <TouchableOpacity style={s.btnContactos} onPress={alElegirDeContactos}>
+        <Text style={s.btnContactosText}>📇 Elegir de contactos</Text>
+      </TouchableOpacity>
+
       <Text style={s.label}>Nombre</Text>
       <TextInput style={s.input} value={nombreCliente} onChangeText={setNombreCliente} placeholder="Nombre del cliente" />
 
@@ -129,6 +144,8 @@ const s = StyleSheet.create({
   label: { fontSize: 13, fontWeight: '600', color: '#7a5c3a', marginBottom: 6, marginTop: 16 },
   input: { backgroundColor: '#fff', color: '#1a1a1a', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 10, padding: 12, fontSize: 15 },
   textarea: { minHeight: 80, textAlignVertical: 'top' },
+  btnContactos: { alignSelf: 'flex-start', backgroundColor: '#e8ddd5', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
+  btnContactosText: { fontSize: 13, fontWeight: '600', color: '#3d1f0a' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
   chipActivo: { backgroundColor: '#3d1f0a', borderColor: '#3d1f0a' },

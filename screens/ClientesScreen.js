@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { API } from '../utils/api';
 import { etapaLabel } from '../utils/crm';
+import { borrarContactoVinculado } from '../utils/contactosSync';
 
 export default function ClientesScreen({ navigation }) {
   const [clientes, setClientes] = useState([]);
@@ -36,6 +37,7 @@ export default function ClientesScreen({ navigation }) {
   async function borrar(id) {
     const token = await AsyncStorage.getItem('token');
     await fetch(`${API}/clientes/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+    borrarContactoVinculado(id);
     cargar();
   }
 
