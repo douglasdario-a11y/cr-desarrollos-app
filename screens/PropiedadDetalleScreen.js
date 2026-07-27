@@ -10,7 +10,7 @@ import MapView, { Marker } from 'react-native-maps';
 import { API } from '../utils/api';
 import { subirArchivo } from '../utils/upload';
 import { compartirTexto, compartirArchivo, compartirArchivos } from '../utils/compartir';
-import { AMENIDADES, COCINA_OPCIONES, fmtColones, fmtM2 } from '../utils/caracteristicas';
+import { ESPACIOS, COCINA_OPCIONES, fmtColones, fmtM2, amenidadesEfectivas, espaciosPersonalizados, ICONO_ESPACIO_PERSONALIZADO } from '../utils/caracteristicas';
 
 const ANCHO_PANTALLA = Dimensions.get('window').width;
 
@@ -45,20 +45,12 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
       const resultado = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['videos'], quality: 0.8 });
       if (resultado.canceled) return;
       archivos = [{ uri: resultado.assets[0].uri, mimeType: resultado.assets[0].mimeType || 'video/mp4' }];
-    } else if (tipo === 'foto') {
+    } else if (tipo === 'foto' || tipo === 'plano_catastro' || tipo === 'certificacion_registro') {
       const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permiso.granted) { Alert.alert('Falta permiso', 'Necesito acceso a tus fotos'); return; }
-      // Fotos sí permite elegir varias de una vez — plano/certificación se
-      // quedan en selección única porque son un solo archivo por propiedad.
       const resultado = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8, allowsMultipleSelection: true });
       if (resultado.canceled) return;
       archivos = resultado.assets.map(a => ({ uri: a.uri, mimeType: a.mimeType || 'image/jpeg' }));
-    } else if (tipo === 'plano_catastro' || tipo === 'certificacion_registro') {
-      const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permiso.granted) { Alert.alert('Falta permiso', 'Necesito acceso a tus fotos'); return; }
-      const resultado = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8 });
-      if (resultado.canceled) return;
-      archivos = [{ uri: resultado.assets[0].uri, mimeType: resultado.assets[0].mimeType || 'image/jpeg' }];
     } else {
       const resultado = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true, multiple: true });
       if (resultado.canceled) return;
@@ -147,25 +139,6 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
     }
   }
 
-  function confirmarBorrarPropiedad() {
-    Alert.alert('Borrar propiedad', '¿Seguro que quieres borrar esta propiedad y todo su material?', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Borrar', style: 'destructive', onPress: borrarPropiedad },
-    ]);
-  }
-
-  async function borrarPropiedad() {
-    try {
-      const token = await AsyncStorage.getItem('token');
-      const res = await fetch(`${API}/propiedades/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error borrando la propiedad');
-      navigation.goBack();
-    } catch (e) {
-      Alert.alert('Error', e.message);
-    }
-  }
-
   if (loading || !propiedad) return <ActivityIndicator size="large" style={{ flex: 1 }} />;
 
   const c = propiedad.caracteristicas || {};
@@ -175,20 +148,35 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
   const fotosPortada = principales.length ? principales : fotos.slice(0, 1);
   const video = media.find(m => m.tipo === 'video');
   const documentos = media.filter(m => m.tipo === 'documento');
-  const planoCatastro = media.find(m => m.tipo === 'plano_catastro');
-  const certificacionRegistro = media.find(m => m.tipo === 'certificacion_registro');
-  const amenidadesActivas = AMENIDADES.filter(a => c[a.key]);
+  const planosCatastro = media.filter(m => m.tipo === 'plano_catastro');
+  const certificacionesRegistro = media.filter(m => m.tipo === 'certificacion_registro');
+  const amenidades = amenidadesEfectivas(c);
   const cocinaLabel = COCINA_OPCIONES.find(op => op.value === c.cocina)?.label;
+  const espaciosActivos = ESPACIOS.filter(e => c[e.key]);
+  const espaciosExtra = espaciosPersonalizados(c);
 
   const datos = [
-    { icon: 'cash', label: 'Precio de venta', valor: fmtColones(propiedad.precio) },
+    ...(propiedad.en_venta ? [{ icon: 'cash', label: 'Precio de venta', valor: fmtColones(propiedad.precio) }] : []),
+    ...(propiedad.en_alquiler ? [{ icon: 'key-variant', label: 'Precio de alquiler', valor: fmtColones(propiedad.precio_alquiler) }] : []),
     { icon: 'receipt', label: 'Valor fiscal', valor: fmtColones(propiedad.valor_fiscal) },
     { icon: 'bed', label: 'Habitaciones', valor: c.habitaciones },
     { icon: 'shower', label: 'Baños', valor: c.banos },
     { icon: 'car', label: 'Vehículos', valor: c.vehiculos },
-    { icon: 'terrain', label: 'Área terreno', valor: fmtM2(c.area_terreno) },
-    { icon: 'ruler-square', label: 'Área construcción', valor: fmtM2(c.area_construccion) },
+    ...(cocinaLabel ? [{ icon: 'stove', label: 'Cocina', valor: cocinaLabel }] : []),
   ].filter(d => d.valor != null && d.valor !== '');
+
+  // Espacios (terraza, sala... y los escritos a mano) se unen a la misma
+  // cuadrícula que precio/habitaciones/baños — misma jerarquía visual.
+  const todosLosDatos = [
+    ...datos,
+    ...espaciosActivos.map(e => ({ icon: e.icon, label: '', valor: e.label })),
+    ...espaciosExtra.map(e => ({ icon: ICONO_ESPACIO_PERSONALIZADO, label: '', valor: e })),
+  ];
+
+  const areasTexto = [
+    fmtM2(c.area_terreno) ? `Área de terreno: ${fmtM2(c.area_terreno)}` : null,
+    fmtM2(c.area_construccion) ? `Área de construcción: ${fmtM2(c.area_construccion)}` : null,
+  ].filter(Boolean).join('  ·  ');
 
   return (
     <>
@@ -209,12 +197,20 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
       )}
 
       <View style={{ padding: 16 }}>
-        {!!propiedad.tipo_propiedad && (
-          <View style={s.tipoChip}>
-            <MaterialCommunityIcons name="home-variant" size={14} color="#fff" />
-            <Text style={s.tipoChipText}>{propiedad.tipo_propiedad}</Text>
-          </View>
-        )}
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+          {!!propiedad.tipo_propiedad && (
+            <View style={s.tipoChip}>
+              <MaterialCommunityIcons name="home-variant" size={14} color="#fff" />
+              <Text style={s.tipoChipText}>{propiedad.tipo_propiedad}</Text>
+            </View>
+          )}
+          {!!propiedad.en_venta && (
+            <View style={s.tipoChip}><Text style={s.tipoChipText}>En venta</Text></View>
+          )}
+          {!!propiedad.en_alquiler && (
+            <View style={s.tipoChip}><Text style={s.tipoChipText}>En alquiler</Text></View>
+          )}
+        </View>
         <View style={s.tituloFila}>
           <Text style={[s.titulo, { flex: 1 }]}>{propiedad.titulo}</Text>
           <TouchableOpacity style={s.btnCompartirChico} onPress={() => compartirTexto(resumenTexto())}>
@@ -255,34 +251,30 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
           }
         </View>
 
-        {/* Grid de datos con iconos */}
-        {datos.length > 0 && (
+        {!!areasTexto && <Text style={s.areasTexto}>{areasTexto}</Text>}
+
+        {/* Grid de datos con iconos (precio, habitaciones, baños... y espacios) */}
+        {todosLosDatos.length > 0 && (
           <View style={s.gridDatos}>
-            {datos.map((d, i) => (
+            {todosLosDatos.map((d, i) => (
               <View key={i} style={s.datoCard}>
                 <MaterialCommunityIcons name={d.icon} size={22} color="#3d1f0a" />
                 <Text style={s.datoValor}>{d.valor}</Text>
-                <Text style={s.datoLabel}>{d.label}</Text>
+                {!!d.label && <Text style={s.datoLabel}>{d.label}</Text>}
               </View>
             ))}
           </View>
         )}
 
-        {/* Amenidades marcadas */}
-        {(amenidadesActivas.length > 0 || cocinaLabel) && (
+        {/* Amenidades especiales (texto libre) */}
+        {amenidades.length > 0 && (
           <View style={s.seccion}>
             <Text style={s.seccionTitulo}>Amenidades</Text>
             <View style={s.chips}>
-              {cocinaLabel && (
-                <View style={s.amenidadChip}>
-                  <MaterialCommunityIcons name="stove" size={16} color="#3d1f0a" />
-                  <Text style={s.amenidadChipText}>Cocina {cocinaLabel.toLowerCase()}</Text>
-                </View>
-              )}
-              {amenidadesActivas.map(a => (
-                <View key={a.key} style={s.amenidadChip}>
-                  <MaterialCommunityIcons name={a.icon} size={16} color="#3d1f0a" />
-                  <Text style={s.amenidadChipText}>{a.label}</Text>
+              {amenidades.map(a => (
+                <View key={a} style={s.amenidadChip}>
+                  <MaterialCommunityIcons name="star-four-points-outline" size={16} color="#3d1f0a" />
+                  <Text style={s.amenidadChipText}>{a}</Text>
                 </View>
               ))}
             </View>
@@ -323,13 +315,28 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
 
         <SeccionMedia titulo={`Fotos (${fotos.length})`} items={fotos} onAgregar={() => elegirYSubir('foto')} onItemPress={item => setFotoVisible(item)} subiendo={subiendo} tipoVisual="imagen"
           extraAction={fotos.length > 0 ? { label: 'Compartir todas', onPress: compartirTodasLasFotos } : null} />
-        <SeccionMedia titulo="Plano de catastro" items={planoCatastro ? [planoCatastro] : []} onAgregar={() => elegirYSubir('plano_catastro')} onItemPress={item => setFotoVisible(item)} subiendo={subiendo} tipoVisual="imagen" single />
-        <SeccionMedia titulo="Certificación de registro" items={certificacionRegistro ? [certificacionRegistro] : []} onAgregar={() => elegirYSubir('certificacion_registro')} onItemPress={item => setFotoVisible(item)} subiendo={subiendo} tipoVisual="imagen" single />
+        <SeccionMedia titulo={`Plano de catastro (${planosCatastro.length})`} items={planosCatastro} onAgregar={() => elegirYSubir('plano_catastro')} onItemPress={item => setFotoVisible(item)} subiendo={subiendo} tipoVisual="imagen" />
+        <SeccionMedia titulo={`Certificación de registro (${certificacionesRegistro.length})`} items={certificacionesRegistro} onAgregar={() => elegirYSubir('certificacion_registro')} onItemPress={item => setFotoVisible(item)} subiendo={subiendo} tipoVisual="imagen" />
         <SeccionMedia titulo={`Otros documentos (${documentos.length})`} items={documentos} onAgregar={() => elegirYSubir('documento')} onItemPress={item => Alert.alert('Documento', '¿Borrar este archivo?', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Borrar', style: 'destructive', onPress: () => borrarMedia(item.id) }])} subiendo={subiendo} tipoVisual="documento" />
 
-        <TouchableOpacity style={s.btnPeligro} onPress={confirmarBorrarPropiedad}>
-          <Text style={s.btnPeligroText}>Borrar propiedad</Text>
-        </TouchableOpacity>
+        {(propiedad.numero_finca || propiedad.numero_catastro || propiedad.nis_agua || propiedad.nis_electricidad) && (
+          <View style={s.seccion}>
+            <Text style={s.seccionTitulo}>Registro y servicios</Text>
+            {!!propiedad.numero_finca && <Text style={s.textoInfo}>📜 Número de Finca: {propiedad.numero_finca}</Text>}
+            {!!propiedad.numero_catastro && <Text style={s.textoInfo}>🗺️ Número de Catastro: {propiedad.numero_catastro}</Text>}
+            {!!propiedad.nis_agua && <Text style={s.textoInfo}>💧 NIS Agua: {propiedad.nis_agua}</Text>}
+            {!!propiedad.nis_electricidad && <Text style={s.textoInfo}>⚡ NIS Electricidad: {propiedad.nis_electricidad}</Text>}
+          </View>
+        )}
+
+        {(propiedad.propietarios || []).length > 0 && (
+          <View style={[s.seccion, { marginBottom: 40 }]}>
+            <Text style={s.seccionTitulo}>{propiedad.propietarios.length > 1 ? 'Propietarios' : 'Propietario'}</Text>
+            {propiedad.propietarios.map(pr => (
+              <Text key={pr.id} style={s.textoInfo}>🧑‍💼 {pr.nombre}{pr.telefono ? ` — ${pr.telefono}` : ''}</Text>
+            ))}
+          </View>
+        )}
       </View>
     </ScrollView>
 
@@ -368,19 +375,7 @@ function ReproductorVideo({ uri }) {
   return <VideoView style={s.video} player={player} allowsFullscreen nativeControls />;
 }
 
-function SeccionMedia({ titulo, items, onAgregar, onItemPress, subiendo, tipoVisual, single, extraAction }) {
-  if (single && items.length > 0) {
-    // Ya hay un archivo único (plano/certificación) — se muestra grande, sin botón de agregar otro.
-    return (
-      <View style={s.seccion}>
-        <Text style={s.seccionTitulo}>{titulo}</Text>
-        <TouchableOpacity onPress={() => onItemPress(items[0])}>
-          <Image source={{ uri: items[0].url }} style={s.imagenGrande} />
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
+function SeccionMedia({ titulo, items, onAgregar, onItemPress, subiendo, tipoVisual, extraAction }) {
   return (
     <View style={s.seccion}>
       <View style={s.seccionHeader}>
@@ -391,11 +386,9 @@ function SeccionMedia({ titulo, items, onAgregar, onItemPress, subiendo, tipoVis
               <Text style={s.agregar}>{extraAction.label}</Text>
             </TouchableOpacity>
           )}
-          {!(single && items.length > 0) && (
-            <TouchableOpacity onPress={onAgregar} disabled={subiendo}>
-              <Text style={s.agregar}>{subiendo ? 'Subiendo…' : '+ Agregar'}</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity onPress={onAgregar} disabled={subiendo}>
+            <Text style={s.agregar}>{subiendo ? 'Subiendo…' : '+ Agregar'}</Text>
+          </TouchableOpacity>
         </View>
       </View>
       {items.length === 0
@@ -432,6 +425,8 @@ const s = StyleSheet.create({
   ubicacion: { fontSize: 14, color: '#7a5c3a' },
   descripcionFila: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: 12 },
   descripcion: { fontSize: 14, color: '#333', lineHeight: 20 },
+  areasTexto: { fontSize: 13, color: '#7a5c3a', marginTop: 10 },
+  textoInfo: { fontSize: 13, color: '#7a5c3a', marginBottom: 4 },
   video: { width: '100%', height: 220, borderRadius: 12, backgroundColor: '#000' },
   borrarVideo: { color: '#b3261e', fontWeight: '600', fontSize: 13, textAlign: 'center', marginTop: 8 },
   gridDatos: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 16 },
@@ -454,9 +449,6 @@ const s = StyleSheet.create({
   mediaItem: { marginRight: 10 },
   mediaImg: { width: 100, height: 100, borderRadius: 10 },
   mediaPlaceholder: { width: 100, height: 100, borderRadius: 10, backgroundColor: '#e8ddd5', alignItems: 'center', justifyContent: 'center' },
-  imagenGrande: { width: '100%', height: 200, borderRadius: 12 },
-  btnPeligro: { marginTop: 32, marginBottom: 40, alignItems: 'center', padding: 12 },
-  btnPeligroText: { color: '#b3261e', fontWeight: '600' },
   visorFondo: { flex: 1, backgroundColor: 'rgba(0,0,0,0.92)', justifyContent: 'center' },
   visorCerrar: { position: 'absolute', top: 48, right: 20, zIndex: 1, padding: 8 },
   visorImagen: { width: '100%', height: '75%' },
