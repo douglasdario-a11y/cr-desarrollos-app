@@ -5,6 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { API } from '../utils/api';
 import { ESTADOS_CITA, partirFechaHora } from '../utils/crm';
+import { sincronizarCita } from '../utils/calendarSync';
 
 function fechaInicial(existente, fechaParam) {
   if (existente?.fecha_hora) return new Date(existente.fecha_hora);
@@ -99,6 +100,10 @@ export default function CitaFormScreen({ route, navigation }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error guardando la cita');
+      const clienteNombre = clientes.find(c => c.id === clienteId)?.nombre_cliente;
+      const propiedadTitulo = propiedades.find(p => p.id === propiedadId)?.titulo;
+      const titulo = ['Cita', clienteNombre, propiedadTitulo].filter(Boolean).join(' - ');
+      sincronizarCita(editando ? existente.id : data.id, { titulo, notas: notas.trim(), fecha: fechaHora });
       navigation.goBack();
     } catch (e) {
       Alert.alert('Error', e.message);

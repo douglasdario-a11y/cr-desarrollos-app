@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { API } from '../utils/api';
 import { estadoCita, fmtFechaHora } from '../utils/crm';
+import { borrarCitaVinculada } from '../utils/calendarSync';
 
 const DIAS_SEMANA = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -65,6 +66,7 @@ export default function CitasScreen({ navigation }) {
   async function borrar(id) {
     const token = await AsyncStorage.getItem('token');
     await fetch(`${API}/citas/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+    borrarCitaVinculada(id);
     cargar();
   }
 

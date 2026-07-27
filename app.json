@@ -56,6 +56,12 @@
         {
           "contactsPermission": "Permitir a CR Desarrollos Inmobiliarios acceder a tus contactos para vincularlos con los clientes."
         }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Permitir a CR Desarrollos Inmobiliarios acceder a tu calendario para sincronizar las citas."
+        }
       ]
     ],
     "extra": {
