@@ -1,4 +1,4 @@
-import * as Calendar from 'expo-calendar';
+import * as Calendar from 'expo-calendar/legacy';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MAP_KEY = 'citaEventMap';
@@ -32,16 +32,19 @@ async function obtenerCalendarioDestino() {
   return preferido.id;
 }
 
-// Crea o actualiza el evento de calendario que corresponde a una cita. Falla
-// en silencio: la sincronización con el calendario nunca debe bloquear el
-// guardado de la cita.
+// Crea o actualiza el evento de calendario que corresponde a una cita.
+// Devuelve { ok: true } o { error } para poder avisar si algo falló.
 export async function sincronizarCita(citaId, { titulo, notas, fecha }) {
-  if (!citaId || !fecha) return;
+  if (!citaId || !fecha) return { error: 'Faltan datos de la cita.' };
   try {
     const { status } = await Calendar.requestCalendarPermissionsAsync();
-    if (status !== 'granted') return;
+    if (status !== 'granted') {
+      return { error: 'No se concedió permiso para acceder al calendario.' };
+    }
     const calendarId = await obtenerCalendarioDestino();
-    if (!calendarId) return;
+    if (!calendarId) {
+      return { error: 'El teléfono no tiene ningún calendario disponible para escribir.' };
+    }
 
     const inicio = new Date(fecha);
     const fin = new Date(inicio.getTime() + 60 * 60 * 1000);
@@ -58,7 +61,7 @@ export async function sincronizarCita(citaId, { titulo, notas, fecha }) {
     if (eventoId) {
       try {
         await Calendar.updateEventAsync(eventoId, detalles);
-        return;
+        return { ok: true };
       } catch (e) {
         // el evento ya no existe en el calendario (lo borraron a mano): se crea uno nuevo
       }
@@ -67,8 +70,9 @@ export async function sincronizarCita(citaId, { titulo, notas, fecha }) {
     const nuevoId = await Calendar.createEventAsync(calendarId, detalles);
     mapa[citaId] = nuevoId;
     await guardarMapa(mapa);
+    return { ok: true };
   } catch (e) {
-    // sin permiso o sin calendario disponible: se ignora
+    return { error: e.message || 'No se pudo sincronizar con el calendario.' };
   }
 }
 

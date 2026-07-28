@@ -103,7 +103,10 @@ export default function CitaFormScreen({ route, navigation }) {
       const clienteNombre = clientes.find(c => c.id === clienteId)?.nombre_cliente;
       const propiedadTitulo = propiedades.find(p => p.id === propiedadId)?.titulo;
       const titulo = ['Cita', clienteNombre, propiedadTitulo].filter(Boolean).join(' - ');
-      sincronizarCita(editando ? existente.id : data.id, { titulo, notas: notas.trim(), fecha: fechaHora });
+      const resultadoCalendario = await sincronizarCita(editando ? existente.id : data.id, { titulo, notas: notas.trim(), fecha: fechaHora });
+      if (resultadoCalendario?.error) {
+        Alert.alert('Calendario', `La cita se guardó, pero no se pudo sincronizar con el calendario: ${resultadoCalendario.error}`);
+      }
       navigation.goBack();
     } catch (e) {
       Alert.alert('Error', e.message);
