@@ -363,10 +363,9 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
               )}
             </View>
             {propiedad.lat != null && propiedad.lng != null && (
-              <View style={s.mapaContenedor} collapsable={false}>
+              <View style={s.mapaContenedor}>
                 <MapView
                   style={s.mapa}
-                  renderToHardwareTextureAndroid
                   initialRegion={{ latitude: Number(propiedad.lat), longitude: Number(propiedad.lng), latitudeDelta: 0.01, longitudeDelta: 0.01 }}
                 >
                   <Marker coordinate={{ latitude: Number(propiedad.lat), longitude: Number(propiedad.lng) }} title={propiedad.titulo} />
