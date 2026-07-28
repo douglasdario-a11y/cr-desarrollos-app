@@ -1,4 +1,4 @@
-import * as Contacts from 'expo-contacts';
+import * as Contacts from 'expo-contacts/legacy';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MAP_KEY = 'clienteContactMap';
@@ -13,13 +13,14 @@ async function guardarMapa(mapa) {
 }
 
 // Crea o actualiza el contacto nativo del teléfono para que quede alineado
-// con los datos del cliente en el CRM. Falla en silencio: la sincronización
-// con la agenda nunca debe bloquear el guardado del cliente.
+// con los datos del cliente en el CRM. Devuelve { ok: true } o { error }.
 export async function sincronizarContacto(clienteId, nombre, telefono) {
-  if (!clienteId || !nombre || !telefono) return;
+  if (!clienteId || !nombre || !telefono) return { error: 'Faltan datos del cliente.' };
   try {
     const { status } = await Contacts.requestPermissionsAsync();
-    if (status !== 'granted') return;
+    if (status !== 'granted') {
+      return { error: 'No se concedió permiso para acceder a los contactos.' };
+    }
 
     const mapa = await leerMapa();
     const contactId = mapa[clienteId];
@@ -34,7 +35,7 @@ export async function sincronizarContacto(clienteId, nombre, telefono) {
     if (contactId) {
       try {
         await Contacts.updateContactAsync({ id: contactId, ...campos });
-        return;
+        return { ok: true };
       } catch (e) {
         // el contacto ya no existe en el teléfono (lo borraron a mano): se crea uno nuevo
       }
@@ -43,8 +44,9 @@ export async function sincronizarContacto(clienteId, nombre, telefono) {
     const nuevoId = await Contacts.addContactAsync(campos);
     mapa[clienteId] = nuevoId;
     await guardarMapa(mapa);
+    return { ok: true };
   } catch (e) {
-    // sin permiso o sin agenda disponible: se ignora
+    return { error: e.message || 'No se pudo sincronizar con los contactos.' };
   }
 }
 
@@ -55,7 +57,7 @@ export async function borrarContactoVinculado(clienteId) {
     if (!contactId) return;
     const { status } = await Contacts.requestPermissionsAsync();
     if (status === 'granted') {
-      await Contacts.deleteContactAsync(contactId).catch(() => {});
+      await Contacts.removeContactAsync(contactId).catch(() => {});
     }
     delete mapa[clienteId];
     await guardarMapa(mapa);

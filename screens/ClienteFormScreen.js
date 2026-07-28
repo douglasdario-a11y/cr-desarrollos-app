@@ -70,7 +70,12 @@ export default function ClienteFormScreen({ route, navigation }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error guardando el cliente');
-      sincronizarContacto(editando ? existente.id : data.id, nombreFinal, telefonoFinal);
+      if (telefonoFinal) {
+        const resultadoContacto = await sincronizarContacto(editando ? existente.id : data.id, nombreFinal, telefonoFinal);
+        if (resultadoContacto?.error) {
+          Alert.alert('Contactos', `El cliente se guardó, pero no se pudo sincronizar con la agenda: ${resultadoContacto.error}`);
+        }
+      }
       navigation.goBack();
     } catch (e) {
       Alert.alert('Error', e.message);
