@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, FlatList, Dimensions, Linking, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, FlatList, Dimensions, Linking, Modal } from 'react-native';
+import { Image } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -231,7 +232,7 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
         {item.fila.map(m => (
           <TouchableOpacity key={m.id} style={s.mediaItem} onPress={() => item.onItemPress(m)}>
             {item.tipoVisual === 'imagen'
-              ? <Image source={{ uri: m.url }} style={s.mediaImg} />
+              ? <Image source={m.url} style={s.mediaImg} contentFit="cover" transition={150} cachePolicy="memory-disk" />
               : <View style={s.mediaPlaceholder}>
                   <MaterialCommunityIcons name="file-document" size={28} color="#3d1f0a" />
                 </View>
@@ -255,7 +256,7 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
           keyExtractor={item => String(item.id)}
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => setFotoVisible(item)}>
-              <Image source={{ uri: item.url }} style={s.fotoPortada} />
+              <Image source={item.url} style={s.fotoPortada} contentFit="cover" transition={150} cachePolicy="memory-disk" />
             </TouchableOpacity>
           )}
         />
@@ -427,7 +428,7 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
         <TouchableOpacity style={s.visorCerrar} onPress={() => setFotoVisible(null)}>
           <MaterialCommunityIcons name="close" size={28} color="#fff" />
         </TouchableOpacity>
-        {fotoVisible && <Image source={{ uri: fotoVisible.url }} style={s.visorImagen} resizeMode="contain" />}
+        {fotoVisible && <Image source={fotoVisible.url} style={s.visorImagen} contentFit="contain" cachePolicy="memory-disk" />}
         {fotoVisible && (
           <View style={s.visorAcciones}>
             <TouchableOpacity style={s.visorBoton} onPress={() => compartirArchivo(fotoVisible.url).catch(e => Alert.alert('Error', e.message))}>

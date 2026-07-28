@@ -62,7 +62,8 @@
         {
           "calendarPermission": "Permitir a CR Desarrollos Inmobiliarios acceder a tu calendario para sincronizar las citas."
         }
-      ]
+      ],
+      "expo-image"
     ],
     "extra": {
       "eas": {
