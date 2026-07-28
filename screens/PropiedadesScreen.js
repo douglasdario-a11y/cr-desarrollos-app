@@ -22,6 +22,7 @@ export default function PropiedadesScreen({ navigation, onLogout }) {
   const [loading, setLoading] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
   const [modoBorrar, setModoBorrar] = useState(false);
+  const [modoEditar, setModoEditar] = useState(false);
   const [seleccionadas, setSeleccionadas] = useState([]);
   const [borrando, setBorrando] = useState(false);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
@@ -83,6 +84,13 @@ export default function PropiedadesScreen({ navigation, onLogout }) {
 
   function toggleModoBorrar() {
     setModoBorrar(v => !v);
+    setModoEditar(false);
+    setSeleccionadas([]);
+  }
+
+  function toggleModoEditar() {
+    setModoEditar(v => !v);
+    setModoBorrar(false);
     setSeleccionadas([]);
   }
 
@@ -136,6 +144,10 @@ export default function PropiedadesScreen({ navigation, onLogout }) {
                 <Text style={s.btnBorrarConfirmarText}>{borrando ? 'Borrando...' : `Borrar (${seleccionadas.length})`}</Text>
               </TouchableOpacity>
             </>
+          ) : modoEditar ? (
+            <TouchableOpacity onPress={toggleModoEditar}>
+              <Text style={s.btnCancelarText}>Cancelar</Text>
+            </TouchableOpacity>
           ) : (
             <>
               <TouchableOpacity onPress={() => Alert.alert('Cuenta', '¿Qué quieres hacer?', [
@@ -154,6 +166,11 @@ export default function PropiedadesScreen({ navigation, onLogout }) {
                 </TouchableOpacity>
               )}
               {propiedades.length > 0 && (
+                <TouchableOpacity onPress={toggleModoEditar}>
+                  <MaterialCommunityIcons name="pencil-outline" size={22} color="#3d1f0a" />
+                </TouchableOpacity>
+              )}
+              {propiedades.length > 0 && (
                 <TouchableOpacity onPress={toggleModoBorrar}>
                   <MaterialCommunityIcons name="trash-can-outline" size={22} color="#b3261e" />
                 </TouchableOpacity>
@@ -165,6 +182,7 @@ export default function PropiedadesScreen({ navigation, onLogout }) {
           )}
         </View>
       </View>
+      {modoEditar && <Text style={s.avisoModo}>Toca una propiedad para editarla</Text>}
       <FlatList
         data={propiedadesFiltradas}
         keyExtractor={(item) => String(item.id)}
@@ -176,7 +194,11 @@ export default function PropiedadesScreen({ navigation, onLogout }) {
           return (
             <TouchableOpacity
               style={[s.card, modoBorrar && seleccionada && s.cardSeleccionada]}
-              onPress={() => modoBorrar ? toggleSeleccion(item.id) : navigation.navigate('PropiedadDetalle', { id: item.id })}
+              onPress={() => {
+                if (modoBorrar) toggleSeleccion(item.id);
+                else if (modoEditar) navigation.navigate('PropiedadForm', { propiedad: item });
+                else navigation.navigate('PropiedadDetalle', { id: item.id });
+              }}
             >
               {item.portada_url
                 ? <Image source={{ uri: item.portada_url }} style={s.foto} />
@@ -196,6 +218,11 @@ export default function PropiedadesScreen({ navigation, onLogout }) {
               {modoBorrar && (
                 <View style={[s.checkCirculo, seleccionada && s.checkCirculoActivo]}>
                   {seleccionada && <MaterialCommunityIcons name="check" size={14} color="#fff" />}
+                </View>
+              )}
+              {modoEditar && (
+                <View style={s.editOverlay}>
+                  <MaterialCommunityIcons name="pencil" size={16} color="#fff" />
                 </View>
               )}
             </TouchableOpacity>
@@ -306,11 +333,13 @@ const s = StyleSheet.create({
   btnBorrarConfirmar: { backgroundColor: '#b3261e', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
   btnBorrarConfirmarText: { color: '#fff', fontWeight: '600', fontSize: 13 },
   btnDeshabilitado: { opacity: 0.4 },
+  avisoModo: { textAlign: 'center', color: '#7a5c3a', fontSize: 12, paddingHorizontal: 16, paddingTop: 10 },
   vacio: { textAlign: 'center', color: '#9a8674', marginTop: 40 },
   card: { flexDirection: 'row', backgroundColor: '#fff', borderRadius: 12, padding: 12, marginBottom: 12, gap: 12, alignItems: 'center' },
   cardSeleccionada: { borderWidth: 2, borderColor: '#b3261e' },
   checkCirculo: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: '#b3261e', alignItems: 'center', justifyContent: 'center' },
   checkCirculoActivo: { backgroundColor: '#b3261e' },
+  editOverlay: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#3d1f0a', alignItems: 'center', justifyContent: 'center' },
   foto: { width: 64, height: 64, borderRadius: 10 },
   fotoVacia: { width: 64, height: 64, borderRadius: 10, backgroundColor: '#e8ddd5', alignItems: 'center', justifyContent: 'center' },
   titulo: { fontSize: 15, fontWeight: '600', color: '#1a1a1a' },
