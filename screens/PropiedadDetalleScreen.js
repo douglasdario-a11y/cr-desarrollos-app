@@ -298,7 +298,7 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
               )}
             </View>
             {propiedad.lat != null && propiedad.lng != null && (
-              <View style={s.mapaContenedor}>
+              <View style={s.mapaContenedor} collapsable={false}>
                 <MapView
                   style={s.mapa}
                   renderToHardwareTextureAndroid
