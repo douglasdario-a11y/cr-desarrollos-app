@@ -298,12 +298,14 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
               )}
             </View>
             {propiedad.lat != null && propiedad.lng != null && (
-              <MapView
-                style={s.mapa}
-                initialRegion={{ latitude: propiedad.lat, longitude: propiedad.lng, latitudeDelta: 0.01, longitudeDelta: 0.01 }}
-              >
-                <Marker coordinate={{ latitude: propiedad.lat, longitude: propiedad.lng }} title={propiedad.titulo} />
-              </MapView>
+              <View style={s.mapaContenedor}>
+                <MapView
+                  style={s.mapa}
+                  initialRegion={{ latitude: propiedad.lat, longitude: propiedad.lng, latitudeDelta: 0.01, longitudeDelta: 0.01 }}
+                >
+                  <Marker coordinate={{ latitude: propiedad.lat, longitude: propiedad.lng }} title={propiedad.titulo} />
+                </MapView>
+              </View>
             )}
             {!!propiedad.maps_link && (
               <TouchableOpacity style={s.btnMaps} onPress={() => Linking.openURL(propiedad.maps_link)}>
@@ -445,7 +447,8 @@ const s = StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   amenidadChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#e8ddd5', borderRadius: 20, paddingVertical: 6, paddingHorizontal: 12 },
   amenidadChipText: { fontSize: 12, fontWeight: '600', color: '#3d1f0a' },
-  mapa: { width: '100%', height: 200, borderRadius: 12, marginBottom: 10 },
+  mapaContenedor: { width: '100%', height: 200, borderRadius: 12, overflow: 'hidden', marginBottom: 10 },
+  mapa: { width: '100%', height: '100%' },
   btnMaps: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#3d1f0a', borderRadius: 10, padding: 12 },
   btnMapsText: { color: '#fff', fontWeight: '600' },
   btnSecundario: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#1a1a1a', borderRadius: 10, padding: 12, alignItems: 'center', marginTop: 20 },
