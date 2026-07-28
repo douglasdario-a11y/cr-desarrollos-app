@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from 'react';
-import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, FlatList, Dimensions, Linking, Modal } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, FlatList, Dimensions, Linking, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -13,6 +13,12 @@ import { compartirTexto, compartirArchivo, compartirArchivos } from '../utils/co
 import { ESPACIOS, COCINA_OPCIONES, fmtColones, fmtM2, amenidadesEfectivas, espaciosPersonalizados, ICONO_ESPACIO_PERSONALIZADO } from '../utils/caracteristicas';
 
 const ANCHO_PANTALLA = Dimensions.get('window').width;
+
+function agruparDe3(items) {
+  const filas = [];
+  for (let i = 0; i < items.length; i += 3) filas.push(items.slice(i, i + 3));
+  return filas;
+}
 
 export default function PropiedadDetalleScreen({ route, navigation }) {
   const { id } = route.params;
@@ -139,10 +145,8 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
     }
   }
 
-  if (loading || !propiedad) return <ActivityIndicator size="large" style={{ flex: 1 }} />;
-
-  const c = propiedad.caracteristicas || {};
-  const media = propiedad.media || [];
+  const c = propiedad?.caracteristicas || {};
+  const media = propiedad?.media || [];
   const fotos = media.filter(m => m.tipo === 'foto');
   const principales = fotos.filter(m => m.es_principal);
   const fotosPortada = principales.length ? principales : fotos.slice(0, 1);
@@ -155,7 +159,7 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
   const espaciosActivos = ESPACIOS.filter(e => c[e.key]);
   const espaciosExtra = espaciosPersonalizados(c);
 
-  const datos = [
+  const datos = propiedad ? [
     ...(propiedad.en_venta ? [{ icon: 'cash', label: 'Precio de venta', valor: fmtColones(propiedad.precio) }] : []),
     ...(propiedad.en_alquiler ? [{ icon: 'key-variant', label: 'Precio de alquiler', valor: fmtColones(propiedad.precio_alquiler) }] : []),
     { icon: 'receipt', label: 'Valor fiscal', valor: fmtColones(propiedad.valor_fiscal) },
@@ -163,7 +167,7 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
     { icon: 'shower', label: 'Baños', valor: c.banos },
     { icon: 'car', label: 'Vehículos', valor: c.vehiculos },
     ...(cocinaLabel ? [{ icon: 'stove', label: 'Cocina', valor: cocinaLabel }] : []),
-  ].filter(d => d.valor != null && d.valor !== '');
+  ].filter(d => d.valor != null && d.valor !== '') : [];
 
   // Espacios (terraza, sala... y los escritos a mano) se unen a la misma
   // cuadrícula que precio/habitaciones/baños — misma jerarquía visual.
@@ -178,9 +182,70 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
     fmtM2(c.area_construccion) ? `Área de construcción: ${fmtM2(c.area_construccion)}` : null,
   ].filter(Boolean).join('  ·  ');
 
-  return (
+  // Una sola lista virtualizada para las 4 galerías (Fotos, Plano de
+  // catastro, Certificación de registro, Otros documentos): cada fila de 3
+  // imágenes es un ítem del FlatList, así solo se decodifican las fotos que
+  // están cerca de la pantalla, no todas de una vez.
+  const paginaData = useMemo(() => {
+    const bloques = [];
+    function agregarGaleria(clave, titulo, items, tipoVisual, tipoSubida, onItemPress, extraAction) {
+      bloques.push({
+        type: 'header', key: `${clave}-header`, titulo,
+        onAgregar: () => elegirYSubir(tipoSubida), extraAction, vacio: items.length === 0,
+      });
+      agruparDe3(items).forEach((fila, i) => {
+        bloques.push({ type: 'fila', key: `${clave}-fila-${i}`, fila, tipoVisual, onItemPress });
+      });
+    }
+    agregarGaleria('fotos', `Fotos (${fotos.length})`, fotos, 'imagen', 'foto', item => setFotoVisible(item),
+      fotos.length > 0 ? { label: 'Compartir todas', onPress: compartirTodasLasFotos } : null);
+    agregarGaleria('plano', `Plano de catastro (${planosCatastro.length})`, planosCatastro, 'imagen', 'plano_catastro', item => setFotoVisible(item));
+    agregarGaleria('certificacion', `Certificación de registro (${certificacionesRegistro.length})`, certificacionesRegistro, 'imagen', 'certificacion_registro', item => setFotoVisible(item));
+    agregarGaleria('documentos', `Otros documentos (${documentos.length})`, documentos, 'documento', 'documento',
+      item => Alert.alert('Documento', '¿Borrar este archivo?', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Borrar', style: 'destructive', onPress: () => borrarMedia(item.id) }]));
+    return bloques;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fotos, planosCatastro, certificacionesRegistro, documentos, subiendo]);
+
+  function renderBloque({ item }) {
+    if (item.type === 'header') {
+      return (
+        <View style={s.filaHeader}>
+          <Text style={s.seccionTitulo}>{item.titulo}</Text>
+          <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center' }}>
+            {item.extraAction && (
+              <TouchableOpacity onPress={item.extraAction.onPress}>
+                <Text style={s.agregar}>{item.extraAction.label}</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity onPress={item.onAgregar} disabled={subiendo}>
+              <Text style={s.agregar}>{subiendo ? 'Subiendo…' : '+ Agregar'}</Text>
+            </TouchableOpacity>
+          </View>
+          {item.vacio && <Text style={[s.vacio, { position: 'absolute', top: 32 }]}>Todavía no hay nada aquí</Text>}
+        </View>
+      );
+    }
+    return (
+      <View style={s.filaGrid}>
+        {item.fila.map(m => (
+          <TouchableOpacity key={m.id} style={s.mediaItem} onPress={() => item.onItemPress(m)}>
+            {item.tipoVisual === 'imagen'
+              ? <Image source={{ uri: m.url }} style={s.mediaImg} />
+              : <View style={s.mediaPlaceholder}>
+                  <MaterialCommunityIcons name="file-document" size={28} color="#3d1f0a" />
+                </View>
+            }
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  }
+
+  if (loading || !propiedad) return <ActivityIndicator size="large" style={{ flex: 1 }} />;
+
+  const cabecera = (
     <>
-    <ScrollView style={s.container}>
       {/* Fotos principales */}
       {fotosPortada.length > 0 && (
         <FlatList
@@ -320,33 +385,43 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
         <TouchableOpacity style={s.btnSecundario} onPress={() => navigation.navigate('PropiedadForm', { propiedad })}>
           <Text style={s.btnSecundarioText}>Editar información</Text>
         </TouchableOpacity>
-
-        <SeccionMedia titulo={`Fotos (${fotos.length})`} items={fotos} onAgregar={() => elegirYSubir('foto')} onItemPress={item => setFotoVisible(item)} subiendo={subiendo} tipoVisual="imagen"
-          extraAction={fotos.length > 0 ? { label: 'Compartir todas', onPress: compartirTodasLasFotos } : null} />
-        <SeccionMedia titulo={`Plano de catastro (${planosCatastro.length})`} items={planosCatastro} onAgregar={() => elegirYSubir('plano_catastro')} onItemPress={item => setFotoVisible(item)} subiendo={subiendo} tipoVisual="imagen" />
-        <SeccionMedia titulo={`Certificación de registro (${certificacionesRegistro.length})`} items={certificacionesRegistro} onAgregar={() => elegirYSubir('certificacion_registro')} onItemPress={item => setFotoVisible(item)} subiendo={subiendo} tipoVisual="imagen" />
-        <SeccionMedia titulo={`Otros documentos (${documentos.length})`} items={documentos} onAgregar={() => elegirYSubir('documento')} onItemPress={item => Alert.alert('Documento', '¿Borrar este archivo?', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Borrar', style: 'destructive', onPress: () => borrarMedia(item.id) }])} subiendo={subiendo} tipoVisual="documento" />
-
-        {(propiedad.numero_finca || propiedad.numero_catastro || propiedad.nis_agua || propiedad.nis_electricidad) && (
-          <View style={s.seccion}>
-            <Text style={s.seccionTitulo}>Registro y servicios</Text>
-            {!!propiedad.numero_finca && <Text style={s.textoInfo}>📜 Número de Finca: {propiedad.numero_finca}</Text>}
-            {!!propiedad.numero_catastro && <Text style={s.textoInfo}>🗺️ Número de Catastro: {propiedad.numero_catastro}</Text>}
-            {!!propiedad.nis_agua && <Text style={s.textoInfo}>💧 NIS Agua: {propiedad.nis_agua}</Text>}
-            {!!propiedad.nis_electricidad && <Text style={s.textoInfo}>⚡ NIS Electricidad: {propiedad.nis_electricidad}</Text>}
-          </View>
-        )}
-
-        {(propiedad.propietarios || []).length > 0 && (
-          <View style={[s.seccion, { marginBottom: 40 }]}>
-            <Text style={s.seccionTitulo}>{propiedad.propietarios.length > 1 ? 'Propietarios' : 'Propietario'}</Text>
-            {propiedad.propietarios.map(pr => (
-              <Text key={pr.id} style={s.textoInfo}>🧑‍💼 {pr.nombre}{pr.telefono ? ` — ${pr.telefono}` : ''}</Text>
-            ))}
-          </View>
-        )}
       </View>
-    </ScrollView>
+    </>
+  );
+
+  const pieDePagina = (
+    <View style={{ paddingHorizontal: 16 }}>
+      {(propiedad.numero_finca || propiedad.numero_catastro || propiedad.nis_agua || propiedad.nis_electricidad) && (
+        <View style={s.seccion}>
+          <Text style={s.seccionTitulo}>Registro y servicios</Text>
+          {!!propiedad.numero_finca && <Text style={s.textoInfo}>📜 Número de Finca: {propiedad.numero_finca}</Text>}
+          {!!propiedad.numero_catastro && <Text style={s.textoInfo}>🗺️ Número de Catastro: {propiedad.numero_catastro}</Text>}
+          {!!propiedad.nis_agua && <Text style={s.textoInfo}>💧 NIS Agua: {propiedad.nis_agua}</Text>}
+          {!!propiedad.nis_electricidad && <Text style={s.textoInfo}>⚡ NIS Electricidad: {propiedad.nis_electricidad}</Text>}
+        </View>
+      )}
+
+      {(propiedad.propietarios || []).length > 0 && (
+        <View style={[s.seccion, { marginBottom: 40 }]}>
+          <Text style={s.seccionTitulo}>{propiedad.propietarios.length > 1 ? 'Propietarios' : 'Propietario'}</Text>
+          {propiedad.propietarios.map(pr => (
+            <Text key={pr.id} style={s.textoInfo}>🧑‍💼 {pr.nombre}{pr.telefono ? ` — ${pr.telefono}` : ''}</Text>
+          ))}
+        </View>
+      )}
+    </View>
+  );
+
+  return (
+    <>
+    <FlatList
+      style={s.container}
+      data={paginaData}
+      keyExtractor={item => item.key}
+      renderItem={renderBloque}
+      ListHeaderComponent={cabecera}
+      ListFooterComponent={pieDePagina}
+    />
 
     <Modal visible={!!fotoVisible} transparent animationType="fade" onRequestClose={() => setFotoVisible(null)}>
       <View style={s.visorFondo}>
@@ -381,41 +456,6 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
 function ReproductorVideo({ uri }) {
   const player = useVideoPlayer(uri, p => { p.loop = false; });
   return <VideoView style={s.video} player={player} allowsFullscreen nativeControls />;
-}
-
-function SeccionMedia({ titulo, items, onAgregar, onItemPress, subiendo, tipoVisual, extraAction }) {
-  return (
-    <View style={s.seccion}>
-      <View style={s.seccionHeader}>
-        <Text style={s.seccionTitulo}>{titulo}</Text>
-        <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center' }}>
-          {extraAction && (
-            <TouchableOpacity onPress={extraAction.onPress}>
-              <Text style={s.agregar}>{extraAction.label}</Text>
-            </TouchableOpacity>
-          )}
-          <TouchableOpacity onPress={onAgregar} disabled={subiendo}>
-            <Text style={s.agregar}>{subiendo ? 'Subiendo…' : '+ Agregar'}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-      {items.length === 0
-        ? <Text style={s.vacio}>Todavía no hay nada aquí</Text>
-        : <View style={s.mediaGrid}>
-            {items.map(item => (
-              <TouchableOpacity key={item.id} style={s.mediaItem} onPress={() => onItemPress(item)}>
-                {tipoVisual === 'imagen'
-                  ? <Image source={{ uri: item.url }} style={s.mediaImg} />
-                  : <View style={s.mediaPlaceholder}>
-                      <MaterialCommunityIcons name="file-document" size={28} color="#3d1f0a" />
-                    </View>
-                }
-              </TouchableOpacity>
-            ))}
-          </View>
-      }
-    </View>
-  );
 }
 
 const s = StyleSheet.create({
@@ -453,7 +493,8 @@ const s = StyleSheet.create({
   btnSecundarioText: { color: '#1a1a1a', fontWeight: '600' },
   agregar: { color: '#3d1f0a', fontWeight: '600', fontSize: 13 },
   vacio: { color: '#9a8674', fontSize: 13 },
-  mediaGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  filaHeader: { marginTop: 20, marginBottom: 8, paddingHorizontal: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  filaGrid: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, marginBottom: 10 },
   mediaItem: {},
   mediaImg: { width: 100, height: 100, borderRadius: 10 },
   mediaPlaceholder: { width: 100, height: 100, borderRadius: 10, backgroundColor: '#e8ddd5', alignItems: 'center', justifyContent: 'center' },
