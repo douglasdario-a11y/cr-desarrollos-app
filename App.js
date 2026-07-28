@@ -17,6 +17,7 @@ import CitasScreen from './screens/CitasScreen';
 import CitaFormScreen from './screens/CitaFormScreen';
 import UsuariosScreen from './screens/UsuariosScreen';
 import UsuarioFormScreen from './screens/UsuarioFormScreen';
+import MapaTestScreen from './screens/_MapaTestScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -94,6 +95,7 @@ export default function App() {
         <Tab.Screen name="Propietarios" component={PropietariosStack} options={{ tabBarIcon: tabIcon('account-tie') }} />
         <Tab.Screen name="Citas" component={CitasStack} options={{ tabBarIcon: tabIcon('calendar-month') }} />
         <Tab.Screen name="Usuarios" component={UsuariosStack} options={{ tabBarIcon: tabIcon('key-variant') }} />
+        <Tab.Screen name="MapaTest" component={MapaTestScreen} options={{ tabBarIcon: tabIcon('map'), title: 'Mapa (test)' }} />
       </Tab.Navigator>
     </NavigationContainer>
   );
