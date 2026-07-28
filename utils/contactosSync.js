@@ -64,15 +64,20 @@ export async function borrarContactoVinculado(clienteId) {
   }
 }
 
-// Abre el selector nativo de contactos y devuelve { nombre, telefono } o null si se canceló.
+// Abre el selector nativo de contactos y devuelve { nombre, telefono },
+// { error } si algo falló, o null si el usuario canceló.
 export async function elegirDeContactos() {
   try {
+    const { status } = await Contacts.requestPermissionsAsync();
+    if (status !== 'granted') {
+      return { error: 'No se concedió permiso para acceder a los contactos.' };
+    }
     const contacto = await Contacts.presentContactPickerAsync();
     if (!contacto) return null;
     const nombre = contacto.name || [contacto.firstName, contacto.lastName].filter(Boolean).join(' ');
     const telefono = contacto.phoneNumbers?.[0]?.number || '';
     return { nombre, telefono };
   } catch (e) {
-    return null;
+    return { error: e.message || 'No se pudo abrir los contactos.' };
   }
 }

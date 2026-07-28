@@ -41,6 +41,7 @@ export default function ClienteFormScreen({ route, navigation }) {
   async function alElegirDeContactos() {
     const contacto = await elegirDeContactos();
     if (!contacto) return;
+    if (contacto.error) { Alert.alert('Contactos', contacto.error); return; }
     if (contacto.nombre) setNombreCliente(contacto.nombre);
     if (contacto.telefono) setTelefono(contacto.telefono);
   }
