@@ -400,12 +400,9 @@ function SeccionMedia({ titulo, items, onAgregar, onItemPress, subiendo, tipoVis
       </View>
       {items.length === 0
         ? <Text style={s.vacio}>Todavía no hay nada aquí</Text>
-        : <FlatList
-            horizontal
-            data={items}
-            keyExtractor={(item) => String(item.id)}
-            renderItem={({ item }) => (
-              <TouchableOpacity style={s.mediaItem} onPress={() => onItemPress(item)}>
+        : <View style={s.mediaGrid}>
+            {items.map(item => (
+              <TouchableOpacity key={item.id} style={s.mediaItem} onPress={() => onItemPress(item)}>
                 {tipoVisual === 'imagen'
                   ? <Image source={{ uri: item.url }} style={s.mediaImg} />
                   : <View style={s.mediaPlaceholder}>
@@ -413,8 +410,8 @@ function SeccionMedia({ titulo, items, onAgregar, onItemPress, subiendo, tipoVis
                     </View>
                 }
               </TouchableOpacity>
-            )}
-          />
+            ))}
+          </View>
       }
     </View>
   );
@@ -455,7 +452,8 @@ const s = StyleSheet.create({
   btnSecundarioText: { color: '#1a1a1a', fontWeight: '600' },
   agregar: { color: '#3d1f0a', fontWeight: '600', fontSize: 13 },
   vacio: { color: '#9a8674', fontSize: 13 },
-  mediaItem: { marginRight: 10 },
+  mediaGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  mediaItem: {},
   mediaImg: { width: 100, height: 100, borderRadius: 10 },
   mediaPlaceholder: { width: 100, height: 100, borderRadius: 10, backgroundColor: '#e8ddd5', alignItems: 'center', justifyContent: 'center' },
   visorFondo: { flex: 1, backgroundColor: 'rgba(0,0,0,0.92)', justifyContent: 'center' },
