@@ -10,6 +10,7 @@ import PropiedadDetalleScreen from './screens/PropiedadDetalleScreen';
 import PropiedadFormScreen from './screens/PropiedadFormScreen';
 import CambiarPinScreen from './screens/CambiarPinScreen';
 import ClientesScreen from './screens/ClientesScreen';
+import ClienteDetalleScreen from './screens/ClienteDetalleScreen';
 import ClienteFormScreen from './screens/ClienteFormScreen';
 import PropietariosScreen from './screens/PropietariosScreen';
 import PropietarioFormScreen from './screens/PropietarioFormScreen';
@@ -42,6 +43,7 @@ function ClientesStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="ClientesLista" component={ClientesScreen} options={{ title: 'Clientes' }} />
+      <Stack.Screen name="ClienteDetalle" component={ClienteDetalleScreen} options={{ title: 'Cliente' }} />
       <Stack.Screen name="ClienteForm" component={ClienteFormScreen} options={{ title: 'Cliente' }} />
     </Stack.Navigator>
   );

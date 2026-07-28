@@ -58,7 +58,7 @@ export default function ClientesScreen({ navigation }) {
         refreshControl={<RefreshControl refreshing={refrescando} onRefresh={() => { setRefrescando(true); cargar(); }} />}
         ListEmptyComponent={<Text style={s.vacio}>Aún no hay clientes. Toca "+ Nuevo" para agregar el primero.</Text>}
         renderItem={({ item }) => (
-          <TouchableOpacity style={s.card} onPress={() => navigation.navigate('ClienteForm', { cliente: item })}>
+          <TouchableOpacity style={s.card} onPress={() => navigation.navigate('ClienteDetalle', { id: item.id })}>
             <View style={{ flex: 1 }}>
               <Text style={s.nombre}>{item.nombre_cliente}</Text>
               <View style={s.detalleFila}>
