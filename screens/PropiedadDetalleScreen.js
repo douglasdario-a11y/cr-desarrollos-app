@@ -391,10 +391,11 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
 
   const pieDePagina = (
     <View style={{ paddingHorizontal: 16 }}>
-      {(propiedad.numero_finca || propiedad.numero_catastro || propiedad.nis_agua || propiedad.nis_electricidad) && (
+      {(propiedad.numero_finca || propiedad.numero_finca_filial || propiedad.numero_catastro || propiedad.nis_agua || propiedad.nis_electricidad) && (
         <View style={s.seccion}>
           <Text style={s.seccionTitulo}>Registro y servicios</Text>
           {!!propiedad.numero_finca && <Text style={s.textoInfo}>📜 Número de Finca: {propiedad.numero_finca}</Text>}
+          {!!propiedad.numero_finca_filial && <Text style={s.textoInfo}>📜 Número de Finca Filial: {propiedad.numero_finca_filial}</Text>}
           {!!propiedad.numero_catastro && <Text style={s.textoInfo}>🗺️ Número de Catastro: {propiedad.numero_catastro}</Text>}
           {!!propiedad.nis_agua && <Text style={s.textoInfo}>💧 NIS Agua: {propiedad.nis_agua}</Text>}
           {!!propiedad.nis_electricidad && <Text style={s.textoInfo}>⚡ NIS Electricidad: {propiedad.nis_electricidad}</Text>}

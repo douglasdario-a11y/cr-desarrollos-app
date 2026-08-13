@@ -26,6 +26,7 @@ export default function PropiedadFormScreen({ route, navigation }) {
   const [nisAgua, setNisAgua] = useState(existente?.nis_agua || '');
   const [nisElectricidad, setNisElectricidad] = useState(existente?.nis_electricidad || '');
   const [numeroFinca, setNumeroFinca] = useState(existente?.numero_finca || '');
+  const [numeroFincaFilial, setNumeroFincaFilial] = useState(existente?.numero_finca_filial || '');
   const [numeroCatastro, setNumeroCatastro] = useState(existente?.numero_catastro || '');
   const [tipoPropiedad, setTipoPropiedad] = useState(existente?.tipo_propiedad || '');
   const [habitaciones, setHabitaciones] = useState(c.habitaciones ? String(c.habitaciones) : '');
@@ -143,6 +144,7 @@ export default function PropiedadFormScreen({ route, navigation }) {
         nis_agua: nisAgua.trim() || null,
         nis_electricidad: nisElectricidad.trim() || null,
         numero_finca: numeroFinca.trim() || null,
+        numero_finca_filial: numeroFincaFilial.trim() || null,
         numero_catastro: numeroCatastro.trim() || null,
         tipo_propiedad: tipoPropiedad || null,
         caracteristicas: {
@@ -412,6 +414,9 @@ export default function PropiedadFormScreen({ route, navigation }) {
           <TextInput style={s.input} value={numeroCatastro} onChangeText={setNumeroCatastro} placeholder="Ej: SJ-1234567-2020" />
         </View>
       </View>
+
+      <Text style={s.label}>Número de Finca Filial</Text>
+      <TextInput style={s.input} value={numeroFincaFilial} onChangeText={setNumeroFincaFilial} placeholder="Ej: 000-12345-F-000" />
 
       <View style={s.fila}>
         <View style={s.filaItem}>
