@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, FlatList, Dimensions, Linking, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, FlatList, Dimensions, Linking } from 'react-native';
 import { Image } from 'expo-image';
+import ImageViewing from 'react-native-image-viewing';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -424,32 +425,37 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
       ListFooterComponent={pieDePagina}
     />
 
-    <Modal visible={!!fotoVisible} transparent animationType="fade" onRequestClose={() => setFotoVisible(null)}>
-      <View style={s.visorFondo}>
-        <TouchableOpacity style={s.visorCerrar} onPress={() => setFotoVisible(null)}>
-          <MaterialCommunityIcons name="close" size={28} color="#fff" />
-        </TouchableOpacity>
-        {fotoVisible && <Image source={fotoVisible.url} style={s.visorImagen} contentFit="contain" cachePolicy="memory-disk" />}
-        {fotoVisible && (
-          <View style={s.visorAcciones}>
-            <TouchableOpacity style={s.visorBoton} onPress={() => compartirArchivo(fotoVisible.url).catch(e => Alert.alert('Error', e.message))}>
-              <MaterialCommunityIcons name="share-variant" size={20} color="#fff" />
-              <Text style={s.visorBotonText}>Compartir</Text>
+    <ImageViewing
+      images={fotoVisible ? [{ uri: fotoVisible.url }] : []}
+      imageIndex={0}
+      visible={!!fotoVisible}
+      onRequestClose={() => setFotoVisible(null)}
+      HeaderComponent={() => (
+        <View style={s.visorHeader}>
+          <TouchableOpacity style={s.visorCerrar} onPress={() => setFotoVisible(null)}>
+            <MaterialCommunityIcons name="close" size={28} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      )}
+      FooterComponent={() => fotoVisible && (
+        <View style={s.visorAcciones}>
+          <TouchableOpacity style={s.visorBoton} onPress={() => compartirArchivo(fotoVisible.url).catch(e => Alert.alert('Error', e.message))}>
+            <MaterialCommunityIcons name="share-variant" size={20} color="#fff" />
+            <Text style={s.visorBotonText}>Compartir</Text>
+          </TouchableOpacity>
+          {fotoVisible.tipo === 'foto' && !fotoVisible.es_principal && (
+            <TouchableOpacity style={s.visorBoton} onPress={() => { marcarPrincipal(fotoVisible.id); setFotoVisible(null); }}>
+              <MaterialCommunityIcons name="star-outline" size={20} color="#fff" />
+              <Text style={s.visorBotonText}>Principal</Text>
             </TouchableOpacity>
-            {fotoVisible.tipo === 'foto' && !fotoVisible.es_principal && (
-              <TouchableOpacity style={s.visorBoton} onPress={() => { marcarPrincipal(fotoVisible.id); setFotoVisible(null); }}>
-                <MaterialCommunityIcons name="star-outline" size={20} color="#fff" />
-                <Text style={s.visorBotonText}>Principal</Text>
-              </TouchableOpacity>
-            )}
-            <TouchableOpacity style={s.visorBoton} onPress={() => confirmarBorrarFoto(fotoVisible)}>
-              <MaterialCommunityIcons name="trash-can-outline" size={20} color="#fff" />
-              <Text style={s.visorBotonText}>Borrar</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-    </Modal>
+          )}
+          <TouchableOpacity style={s.visorBoton} onPress={() => confirmarBorrarFoto(fotoVisible)}>
+            <MaterialCommunityIcons name="trash-can-outline" size={20} color="#fff" />
+            <Text style={s.visorBotonText}>Borrar</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    />
     </>
   );
 }
@@ -499,10 +505,9 @@ const s = StyleSheet.create({
   mediaItem: {},
   mediaImg: { width: 100, height: 100, borderRadius: 10 },
   mediaPlaceholder: { width: 100, height: 100, borderRadius: 10, backgroundColor: '#e8ddd5', alignItems: 'center', justifyContent: 'center' },
-  visorFondo: { flex: 1, backgroundColor: 'rgba(0,0,0,0.92)', justifyContent: 'center' },
-  visorCerrar: { position: 'absolute', top: 48, right: 20, zIndex: 1, padding: 8 },
-  visorImagen: { width: '100%', height: '75%' },
-  visorAcciones: { flexDirection: 'row', justifyContent: 'space-evenly', paddingVertical: 24 },
+  visorHeader: { paddingTop: 48, paddingHorizontal: 16, alignItems: 'flex-end' },
+  visorCerrar: { padding: 8 },
+  visorAcciones: { flexDirection: 'row', justifyContent: 'space-evenly', paddingVertical: 24, backgroundColor: 'rgba(0,0,0,0.92)' },
   visorBoton: { alignItems: 'center', gap: 6 },
   visorBotonText: { color: '#fff', fontSize: 12, fontWeight: '600' },
 });
