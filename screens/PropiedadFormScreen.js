@@ -18,6 +18,7 @@ export default function PropiedadFormScreen({ route, navigation }) {
   const [precio, setPrecio] = useState(existente?.precio ? String(existente.precio) : '');
   const [precioAlquiler, setPrecioAlquiler] = useState(existente?.precio_alquiler ? String(existente.precio_alquiler) : '');
   const [valorFiscal, setValorFiscal] = useState(existente?.valor_fiscal ? String(existente.valor_fiscal) : '');
+  const [cuotaMantenimiento, setCuotaMantenimiento] = useState(existente?.cuota_mantenimiento ? String(existente.cuota_mantenimiento) : '');
   const [ubicacion, setUbicacion] = useState(existente?.ubicacion || '');
   const [provincia, setProvincia] = useState(existente?.provincia || '');
   const [canton, setCanton] = useState(existente?.canton || '');
@@ -136,6 +137,7 @@ export default function PropiedadFormScreen({ route, navigation }) {
         precio: precio ? Number(precio) : null,
         precio_alquiler: precioAlquiler ? Number(precioAlquiler) : null,
         valor_fiscal: valorFiscal ? Number(valorFiscal) : null,
+        cuota_mantenimiento: cuotaMantenimiento ? Number(cuotaMantenimiento) : null,
         ubicacion: ubicacion.trim() || null,
         provincia: provincia || null,
         canton: canton || null,
@@ -244,6 +246,9 @@ export default function PropiedadFormScreen({ route, navigation }) {
           <TextInput style={s.input} value={valorFiscal} onChangeText={setValorFiscal} placeholder="60000000" keyboardType="numeric" />
         </View>
       </View>
+
+      <Text style={s.label}>Cuota de mantenimiento (₡/mes)</Text>
+      <TextInput style={s.input} value={cuotaMantenimiento} onChangeText={setCuotaMantenimiento} placeholder="45000" keyboardType="numeric" />
 
       <Text style={s.label}>Ubicación</Text>
       <TextInput style={s.input} value={ubicacion} onChangeText={setUbicacion} placeholder="Escazú, San José" />

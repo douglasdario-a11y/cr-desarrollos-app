@@ -165,6 +165,7 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
     ...(propiedad.en_venta ? [{ icon: 'cash', label: 'Precio de venta', valor: fmtColones(propiedad.precio) }] : []),
     ...(propiedad.en_alquiler ? [{ icon: 'key-variant', label: 'Precio de alquiler', valor: fmtColones(propiedad.precio_alquiler) }] : []),
     { icon: 'receipt', label: 'Valor fiscal', valor: fmtColones(propiedad.valor_fiscal) },
+    { icon: 'office-building', label: 'Cuota de mantenimiento', valor: propiedad.cuota_mantenimiento != null ? `${fmtColones(propiedad.cuota_mantenimiento)} / mes` : null },
     { icon: 'bed', label: 'Habitaciones', valor: c.habitaciones },
     { icon: 'shower', label: 'Baños', valor: c.banos },
     { icon: 'car', label: 'Vehículos', valor: c.vehiculos },
