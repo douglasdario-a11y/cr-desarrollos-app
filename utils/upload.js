@@ -38,3 +38,34 @@ export async function subirArchivo({ propiedadId, uri, tipo, contentType, esPrin
   if (!resConfirmar.ok) throw new Error(media.error || 'No se pudo guardar el archivo');
   return media;
 }
+
+// Sube el documento de personería jurídica de un propietario (un solo
+// archivo, PDF o imagen) — mismo flujo de URL prefirmada.
+export async function subirDocumentoPropietario({ propietarioId, uri, contentType }) {
+  const token = await AsyncStorage.getItem('token');
+  const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+
+  const resSolicitud = await fetch(`${API}/propietarios/${propietarioId}/documento/solicitar-subida`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ content_type: contentType }),
+  });
+  const solicitud = await resSolicitud.json();
+  if (!resSolicitud.ok) throw new Error(solicitud.error || 'No se pudo iniciar la subida');
+
+  const resSubida = await FileSystem.uploadAsync(solicitud.uploadUrl, uri, {
+    httpMethod: 'PUT',
+    headers: { 'Content-Type': contentType },
+    uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
+  });
+  if (resSubida.status < 200 || resSubida.status >= 300) throw new Error('No se pudo subir el archivo');
+
+  const resConfirmar = await fetch(`${API}/propietarios/${propietarioId}/documento/confirmar`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ key: solicitud.key }),
+  });
+  const propietario = await resConfirmar.json();
+  if (!resConfirmar.ok) throw new Error(propietario.error || 'No se pudo guardar el documento');
+  return propietario;
+}

@@ -11,6 +11,10 @@ export default function PropietarioFormScreen({ route, navigation }) {
   const [nombre, setNombre] = useState(existente?.nombre || '');
   const [telefono, setTelefono] = useState(existente?.telefono || '');
   const [email, setEmail] = useState(existente?.email || '');
+  const [representanteLegal, setRepresentanteLegal] = useState(existente?.representante_legal || '');
+  const [direccion, setDireccion] = useState(existente?.direccion || '');
+  const [numeroCuentaBancaria, setNumeroCuentaBancaria] = useState(existente?.numero_cuenta_bancaria || '');
+  const [codigoActividadEconomica, setCodigoActividadEconomica] = useState(existente?.codigo_actividad_economica || '');
   const [notas, setNotas] = useState(existente?.notas || '');
   const [propiedadIds, setPropiedadIds] = useState((existente?.propiedades || []).map(p => p.id));
   const [propiedades, setPropiedades] = useState([]);
@@ -40,6 +44,10 @@ export default function PropietarioFormScreen({ route, navigation }) {
         nombre: nombre.trim(),
         telefono: telefono.trim() || null,
         email: email.trim() || null,
+        representante_legal: representanteLegal.trim() || null,
+        direccion: direccion.trim() || null,
+        numero_cuenta_bancaria: numeroCuentaBancaria.trim() || null,
+        codigo_actividad_economica: codigoActividadEconomica.trim() || null,
         notas: notas.trim() || null,
         propiedad_ids: propiedadIds,
       };
@@ -69,6 +77,18 @@ export default function PropietarioFormScreen({ route, navigation }) {
 
       <Text style={s.label}>Correo</Text>
       <TextInput style={s.input} value={email} onChangeText={setEmail} placeholder="propietario@correo.com" autoCapitalize="none" keyboardType="email-address" />
+
+      <Text style={s.label}>Dirección</Text>
+      <TextInput style={s.input} value={direccion} onChangeText={setDireccion} placeholder="Dirección exacta" />
+
+      <Text style={s.label}>Nombre de representante legal</Text>
+      <TextInput style={s.input} value={representanteLegal} onChangeText={setRepresentanteLegal} placeholder="Si es una sociedad" />
+
+      <Text style={s.label}>Número de cuenta bancaria</Text>
+      <TextInput style={s.input} value={numeroCuentaBancaria} onChangeText={setNumeroCuentaBancaria} placeholder="IBAN o número de cuenta" />
+
+      <Text style={s.label}>Código de actividad económica</Text>
+      <TextInput style={s.input} value={codigoActividadEconomica} onChangeText={setCodigoActividadEconomica} placeholder="Ej: 682002" />
 
       <Text style={s.label}>Propiedades que posee</Text>
       <View style={s.chips}>
