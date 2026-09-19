@@ -27,6 +27,7 @@ export default function PropiedadesScreen({ navigation, onLogout }) {
   const [borrando, setBorrando] = useState(false);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [filtros, setFiltros] = useState(FILTROS_VACIOS);
+  const [vista, setVista] = useState('activa'); // 'activa' | 'inactiva' | 'todas'
 
   async function cargar() {
     try {
@@ -69,6 +70,7 @@ export default function PropiedadesScreen({ navigation, onLogout }) {
   const propiedadesFiltradas = useMemo(() => {
     return propiedades.filter(p => {
       const c = p.caracteristicas || {};
+      if (vista !== 'todas' && (p.estado || 'activa') !== vista) return false;
       if (filtros.operacion === 'venta' && !p.en_venta) return false;
       if (filtros.operacion === 'alquiler' && !p.en_alquiler) return false;
       if (filtros.tipo && p.tipo_propiedad !== filtros.tipo) return false;
@@ -80,7 +82,7 @@ export default function PropiedadesScreen({ navigation, onLogout }) {
       if (filtros.distrito && p.distrito !== filtros.distrito) return false;
       return true;
     });
-  }, [propiedades, filtros]);
+  }, [propiedades, filtros, vista]);
 
   function toggleModoBorrar() {
     setModoBorrar(v => !v);
@@ -182,6 +184,15 @@ export default function PropiedadesScreen({ navigation, onLogout }) {
           )}
         </View>
       </View>
+      {!modoBorrar && !modoEditar && (
+        <View style={s.vistaChips}>
+          {[{ v: 'activa', l: 'Activas' }, { v: 'inactiva', l: 'Inactivas' }, { v: 'todas', l: 'Todas' }].map(op => (
+            <TouchableOpacity key={op.v} style={[s.vistaChip, vista === op.v && s.vistaChipActivo]} onPress={() => setVista(op.v)}>
+              <Text style={[s.vistaChipText, vista === op.v && s.vistaChipTextActivo]}>{op.l}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
       {modoEditar && <Text style={s.avisoModo}>Toca una propiedad para editarla</Text>}
       <FlatList
         data={propiedadesFiltradas}
@@ -209,6 +220,7 @@ export default function PropiedadesScreen({ navigation, onLogout }) {
                   {item.tipo_propiedad && <View style={s.tipoChip}><Text style={s.tipoChipText}>{item.tipo_propiedad}</Text></View>}
                   {item.en_venta && <View style={s.tipoChip}><Text style={s.tipoChipText}>En venta</Text></View>}
                   {item.en_alquiler && <View style={s.tipoChip}><Text style={s.tipoChipText}>En alquiler</Text></View>}
+                  {item.estado === 'inactiva' && <View style={s.chipInactiva}><Text style={s.tipoChipText}>Inactiva</Text></View>}
                 </View>
                 <Text style={s.titulo}>{item.titulo}</Text>
                 <Text style={s.detalle}>{item.ubicacion}</Text>
@@ -334,6 +346,12 @@ const s = StyleSheet.create({
   btnBorrarConfirmarText: { color: '#fff', fontWeight: '600', fontSize: 13 },
   btnDeshabilitado: { opacity: 0.4 },
   avisoModo: { textAlign: 'center', color: '#7a5c3a', fontSize: 12, paddingHorizontal: 16, paddingTop: 10 },
+  vistaChips: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingTop: 12 },
+  vistaChip: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 16 },
+  vistaChipActivo: { backgroundColor: '#3d1f0a', borderColor: '#3d1f0a' },
+  vistaChipText: { fontSize: 13, fontWeight: '600', color: '#3d1f0a' },
+  vistaChipTextActivo: { color: '#fff' },
+  chipInactiva: { backgroundColor: '#b3261e', borderRadius: 20, paddingVertical: 2, paddingHorizontal: 8 },
   vacio: { textAlign: 'center', color: '#9a8674', marginTop: 40 },
   card: { flexDirection: 'row', backgroundColor: '#fff', borderRadius: 12, padding: 12, marginBottom: 12, gap: 12, alignItems: 'center' },
   cardSeleccionada: { borderWidth: 2, borderColor: '#b3261e' },

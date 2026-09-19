@@ -100,6 +100,23 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
     }
   }
 
+  async function cambiarEstado() {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const nuevoEstado = propiedad.estado === 'inactiva' ? 'activa' : 'inactiva';
+      const res = await fetch(`${API}/propiedades/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ estado: nuevoEstado }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error cambiando el estado');
+      setPropiedad(data);
+    } catch (e) {
+      Alert.alert('Error', e.message);
+    }
+  }
+
   async function marcarPrincipal(mediaId) {
     try {
       const token = await AsyncStorage.getItem('token');
@@ -293,6 +310,9 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
           {!!propiedad.en_alquiler && (
             <View style={s.tipoChip}><Text style={s.tipoChipText}>En alquiler</Text></View>
           )}
+          {propiedad.estado === 'inactiva' && (
+            <View style={s.chipInactiva}><Text style={s.tipoChipText}>Inactiva</Text></View>
+          )}
         </View>
         <View style={s.tituloFila}>
           <Text style={[s.titulo, { flex: 1 }]}>{propiedad.titulo}</Text>
@@ -402,6 +422,10 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
         <TouchableOpacity style={s.btnSecundario} onPress={() => navigation.navigate('PropiedadForm', { propiedad })}>
           <Text style={s.btnSecundarioText}>Editar información</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity style={s.btnSecundario} onPress={cambiarEstado}>
+          <Text style={s.btnSecundarioText}>{propiedad.estado === 'inactiva' ? '✅ Reactivar propiedad' : '🚫 Marcar como inactiva'}</Text>
+        </TouchableOpacity>
       </View>
     </>
   );
@@ -486,6 +510,7 @@ const s = StyleSheet.create({
   fotoPortada: { width: ANCHO_PANTALLA, height: 260 },
   tipoChip: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', backgroundColor: '#3d1f0a', borderRadius: 20, paddingVertical: 4, paddingHorizontal: 10, marginBottom: 8 },
   tipoChipText: { color: '#fff', fontSize: 12, fontWeight: '700' },
+  chipInactiva: { alignSelf: 'flex-start', backgroundColor: '#b3261e', borderRadius: 20, paddingVertical: 4, paddingHorizontal: 10, marginBottom: 8 },
   titulo: { fontSize: 20, fontWeight: '700', color: '#1a1a1a' },
   tituloFila: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
   btnCompartirChico: { padding: 4 },
