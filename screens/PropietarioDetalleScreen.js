@@ -117,12 +117,14 @@ export default function PropietarioDetalleScreen({ route, navigation }) {
           {!!propietario.codigo_actividad_economica && <Text style={s.textoInfo}>🏷️ Actividad económica: {propietario.codigo_actividad_economica}</Text>}
         </View>
 
-        {propietario.tipo === 'juridica' && !!propietario.representante_legal && (
+        {propietario.tipo === 'juridica' && (propietario.representantes_legales || []).length > 0 && (
           <View style={s.seccion}>
-            <Text style={s.seccionTitulo}>Representante legal</Text>
-            <TouchableOpacity style={s.propFila} onPress={() => navigation.navigate('PropietarioDetalle', { id: propietario.representante_legal.id })}>
-              <Text style={s.propFilaText}>🧑‍⚖️ {propietario.representante_legal.nombre}{propietario.representante_legal.cedula ? ` (${propietario.representante_legal.cedula})` : ''}</Text>
-            </TouchableOpacity>
+            <Text style={s.seccionTitulo}>Representantes legales</Text>
+            {propietario.representantes_legales.map(rep => (
+              <TouchableOpacity key={rep.id} style={s.propFila} onPress={() => navigation.navigate('PropietarioDetalle', { id: rep.id })}>
+                <Text style={s.propFilaText}>🧑‍⚖️ {rep.nombre}{rep.cedula ? ` (${rep.cedula})` : ''}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         )}
 

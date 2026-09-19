@@ -22,8 +22,8 @@ export default function PropietarioFormScreen({ route, navigation }) {
   const [guardando, setGuardando] = useState(false);
 
   const [fisicas, setFisicas] = useState([]);
-  const [modoRepresentante, setModoRepresentante] = useState('existente');
-  const [representanteLegalId, setRepresentanteLegalId] = useState(existente?.representante_legal?.id || null);
+  const [representanteIds, setRepresentanteIds] = useState((existente?.representantes_legales || []).map(r => r.id));
+  const [agregandoNuevoRep, setAgregandoNuevoRep] = useState(false);
   const [nuevoRepNombre, setNuevoRepNombre] = useState('');
   const [nuevoRepCedula, setNuevoRepCedula] = useState('');
   const [nuevoRepTelefono, setNuevoRepTelefono] = useState('');
@@ -54,13 +54,17 @@ export default function PropietarioFormScreen({ route, navigation }) {
     setPropiedadIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   }
 
+  function toggleRepresentante(id) {
+    setRepresentanteIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  }
+
   async function guardar() {
     if (!nombre.trim()) { Alert.alert('Error', 'El nombre es requerido'); return; }
     setGuardando(true);
     try {
       const token = await AsyncStorage.getItem('token');
-      let repId = tipo === 'juridica' && modoRepresentante === 'existente' && representanteLegalId ? representanteLegalId : null;
-      if (tipo === 'juridica' && modoRepresentante === 'nuevo' && nuevoRepNombre.trim()) {
+      const repIds = tipo === 'juridica' ? [...representanteIds] : [];
+      if (tipo === 'juridica' && agregandoNuevoRep && nuevoRepNombre.trim()) {
         const resRep = await fetch(`${API}/propietarios`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -75,7 +79,7 @@ export default function PropietarioFormScreen({ route, navigation }) {
         });
         const rep = await resRep.json();
         if (!resRep.ok) throw new Error(rep.error || 'Error creando el representante legal');
-        repId = rep.id;
+        repIds.push(rep.id);
       }
       const body = {
         tipo,
@@ -83,7 +87,7 @@ export default function PropietarioFormScreen({ route, navigation }) {
         telefono: telefono.trim() || null,
         email: email.trim() || null,
         cedula: cedula.trim() || null,
-        representante_legal_id: repId,
+        representante_ids: repIds,
         direccion: direccion.trim() || null,
         numero_cuenta_bancaria: numeroCuentaBancaria.trim() || null,
         codigo_actividad_economica: codigoActividadEconomica.trim() || null,
@@ -135,37 +139,29 @@ export default function PropietarioFormScreen({ route, navigation }) {
 
       {tipo === 'juridica' && (
         <View style={s.seccionRep}>
-          <Text style={s.label}>Representante legal</Text>
+          <Text style={s.label}>Representantes legales</Text>
           <View style={s.chips}>
-            <TouchableOpacity style={[s.chip, modoRepresentante === 'existente' && s.chipActivo]} onPress={() => setModoRepresentante('existente')}>
-              <Text style={[s.chipText, modoRepresentante === 'existente' && s.chipTextActivo]}>Elegir persona existente</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[s.chip, modoRepresentante === 'nuevo' && s.chipActivo]} onPress={() => setModoRepresentante('nuevo')}>
-              <Text style={[s.chipText, modoRepresentante === 'nuevo' && s.chipTextActivo]}>+ Registrar nueva persona física</Text>
-            </TouchableOpacity>
+            {fisicas.map(f => (
+              <TouchableOpacity key={f.id} style={[s.chip, representanteIds.includes(f.id) && s.chipActivo]} onPress={() => toggleRepresentante(f.id)}>
+                <Text style={[s.chipText, representanteIds.includes(f.id) && s.chipTextActivo]}>{f.nombre}{f.cedula ? ` (${f.cedula})` : ''}</Text>
+              </TouchableOpacity>
+            ))}
+            {fisicas.length === 0 && <Text style={s.vacio}>Todavía no hay personas físicas registradas.</Text>}
           </View>
 
-          {modoRepresentante === 'existente'
-            ? (
-              <View style={[s.chips, { marginTop: 10 }]}>
-                {fisicas.map(f => (
-                  <TouchableOpacity key={f.id} style={[s.chip, representanteLegalId === f.id && s.chipActivo]} onPress={() => setRepresentanteLegalId(f.id)}>
-                    <Text style={[s.chipText, representanteLegalId === f.id && s.chipTextActivo]}>{f.nombre}{f.cedula ? ` (${f.cedula})` : ''}</Text>
-                  </TouchableOpacity>
-                ))}
-                {fisicas.length === 0 && <Text style={s.vacio}>Todavía no hay personas físicas registradas.</Text>}
-              </View>
-            )
-            : (
-              <View style={{ marginTop: 10 }}>
-                <TextInput style={s.input} value={nuevoRepNombre} onChangeText={setNuevoRepNombre} placeholder="Nombre del representante" />
-                <TextInput style={[s.input, { marginTop: 10 }]} value={nuevoRepCedula} onChangeText={setNuevoRepCedula} placeholder="Número de cédula" />
-                <TextInput style={[s.input, { marginTop: 10 }]} value={nuevoRepTelefono} onChangeText={setNuevoRepTelefono} placeholder="Teléfono" keyboardType="phone-pad" />
-                <TextInput style={[s.input, { marginTop: 10 }]} value={nuevoRepEmail} onChangeText={setNuevoRepEmail} placeholder="Correo" autoCapitalize="none" keyboardType="email-address" />
-                <TextInput style={[s.input, { marginTop: 10 }]} value={nuevoRepDireccion} onChangeText={setNuevoRepDireccion} placeholder="Dirección exacta" />
-              </View>
-            )
-          }
+          <TouchableOpacity style={[s.chip, { marginTop: 10, alignSelf: 'flex-start' }, agregandoNuevoRep && s.chipActivo]} onPress={() => setAgregandoNuevoRep(v => !v)}>
+            <Text style={[s.chipText, agregandoNuevoRep && s.chipTextActivo]}>+ Registrar nueva persona física</Text>
+          </TouchableOpacity>
+
+          {agregandoNuevoRep && (
+            <View style={{ marginTop: 10 }}>
+              <TextInput style={s.input} value={nuevoRepNombre} onChangeText={setNuevoRepNombre} placeholder="Nombre del representante" />
+              <TextInput style={[s.input, { marginTop: 10 }]} value={nuevoRepCedula} onChangeText={setNuevoRepCedula} placeholder="Número de cédula" />
+              <TextInput style={[s.input, { marginTop: 10 }]} value={nuevoRepTelefono} onChangeText={setNuevoRepTelefono} placeholder="Teléfono" keyboardType="phone-pad" />
+              <TextInput style={[s.input, { marginTop: 10 }]} value={nuevoRepEmail} onChangeText={setNuevoRepEmail} placeholder="Correo" autoCapitalize="none" keyboardType="email-address" />
+              <TextInput style={[s.input, { marginTop: 10 }]} value={nuevoRepDireccion} onChangeText={setNuevoRepDireccion} placeholder="Dirección exacta" />
+            </View>
+          )}
         </View>
       )}
 
