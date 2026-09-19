@@ -8,10 +8,11 @@ export default function PropietarioFormScreen({ route, navigation }) {
   const existente = route.params?.propietario;
   const editando = !!existente;
 
+  const [tipo, setTipo] = useState(existente?.tipo || 'fisica');
   const [nombre, setNombre] = useState(existente?.nombre || '');
   const [telefono, setTelefono] = useState(existente?.telefono || '');
   const [email, setEmail] = useState(existente?.email || '');
-  const [representanteLegal, setRepresentanteLegal] = useState(existente?.representante_legal || '');
+  const [cedula, setCedula] = useState(existente?.cedula || '');
   const [direccion, setDireccion] = useState(existente?.direccion || '');
   const [numeroCuentaBancaria, setNumeroCuentaBancaria] = useState(existente?.numero_cuenta_bancaria || '');
   const [codigoActividadEconomica, setCodigoActividadEconomica] = useState(existente?.codigo_actividad_economica || '');
@@ -19,6 +20,15 @@ export default function PropietarioFormScreen({ route, navigation }) {
   const [propiedadIds, setPropiedadIds] = useState((existente?.propiedades || []).map(p => p.id));
   const [propiedades, setPropiedades] = useState([]);
   const [guardando, setGuardando] = useState(false);
+
+  const [fisicas, setFisicas] = useState([]);
+  const [modoRepresentante, setModoRepresentante] = useState('existente');
+  const [representanteLegalId, setRepresentanteLegalId] = useState(existente?.representante_legal?.id || null);
+  const [nuevoRepNombre, setNuevoRepNombre] = useState('');
+  const [nuevoRepCedula, setNuevoRepCedula] = useState('');
+  const [nuevoRepTelefono, setNuevoRepTelefono] = useState('');
+  const [nuevoRepEmail, setNuevoRepEmail] = useState('');
+  const [nuevoRepDireccion, setNuevoRepDireccion] = useState('');
 
   async function cargarPropiedades() {
     try {
@@ -29,7 +39,16 @@ export default function PropietarioFormScreen({ route, navigation }) {
     } catch (e) { /* la lista queda vacía si falla */ }
   }
 
-  useFocusEffect(useCallback(() => { cargarPropiedades(); }, []));
+  async function cargarFisicas() {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const res = await fetch(`${API}/propietarios?tipo=fisica`, { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      if (res.ok) setFisicas(Array.isArray(data) ? data : []);
+    } catch (e) { /* la lista queda vacía si falla */ }
+  }
+
+  useFocusEffect(useCallback(() => { cargarPropiedades(); cargarFisicas(); }, []));
 
   function toggleProp(id) {
     setPropiedadIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -37,14 +56,42 @@ export default function PropietarioFormScreen({ route, navigation }) {
 
   async function guardar() {
     if (!nombre.trim()) { Alert.alert('Error', 'El nombre es requerido'); return; }
+    if (!cedula.trim()) { Alert.alert('Error', `El número de cédula${tipo === 'juridica' ? ' jurídica' : ''} es requerido`); return; }
+    if (tipo === 'juridica') {
+      if (modoRepresentante === 'existente' && !representanteLegalId) { Alert.alert('Error', 'Elegí el representante legal'); return; }
+      if (modoRepresentante === 'nuevo' && (!nuevoRepNombre.trim() || !nuevoRepCedula.trim())) {
+        Alert.alert('Error', 'El nombre y la cédula del representante legal son requeridos');
+        return;
+      }
+    }
     setGuardando(true);
     try {
       const token = await AsyncStorage.getItem('token');
+      let repId = tipo === 'juridica' && modoRepresentante === 'existente' ? representanteLegalId : null;
+      if (tipo === 'juridica' && modoRepresentante === 'nuevo') {
+        const resRep = await fetch(`${API}/propietarios`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            tipo: 'fisica',
+            nombre: nuevoRepNombre.trim(),
+            cedula: nuevoRepCedula.trim(),
+            telefono: nuevoRepTelefono.trim() || null,
+            email: nuevoRepEmail.trim() || null,
+            direccion: nuevoRepDireccion.trim() || null,
+          }),
+        });
+        const rep = await resRep.json();
+        if (!resRep.ok) throw new Error(rep.error || 'Error creando el representante legal');
+        repId = rep.id;
+      }
       const body = {
+        tipo,
         nombre: nombre.trim(),
         telefono: telefono.trim() || null,
         email: email.trim() || null,
-        representante_legal: representanteLegal.trim() || null,
+        cedula: cedula.trim(),
+        representante_legal_id: repId,
         direccion: direccion.trim() || null,
         numero_cuenta_bancaria: numeroCuentaBancaria.trim() || null,
         codigo_actividad_economica: codigoActividadEconomica.trim() || null,
@@ -69,8 +116,18 @@ export default function PropietarioFormScreen({ route, navigation }) {
 
   return (
     <ScrollView style={s.container} contentContainerStyle={{ padding: 16 }}>
-      <Text style={s.label}>Nombre</Text>
-      <TextInput style={s.input} value={nombre} onChangeText={setNombre} placeholder="Nombre del propietario" />
+      <Text style={s.label}>Tipo</Text>
+      <View style={s.chips}>
+        <TouchableOpacity style={[s.chip, tipo === 'fisica' && s.chipActivo]} onPress={() => setTipo('fisica')}>
+          <Text style={[s.chipText, tipo === 'fisica' && s.chipTextActivo]}>Persona física</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[s.chip, tipo === 'juridica' && s.chipActivo]} onPress={() => setTipo('juridica')}>
+          <Text style={[s.chipText, tipo === 'juridica' && s.chipTextActivo]}>Persona jurídica</Text>
+        </TouchableOpacity>
+      </View>
+
+      <Text style={s.label}>{tipo === 'juridica' ? 'Razón social' : 'Nombre'}</Text>
+      <TextInput style={s.input} value={nombre} onChangeText={setNombre} placeholder={tipo === 'juridica' ? 'Nombre de la sociedad' : 'Nombre del propietario'} />
 
       <Text style={s.label}>Teléfono</Text>
       <TextInput style={s.input} value={telefono} onChangeText={setTelefono} placeholder="8888-8888" keyboardType="phone-pad" />
@@ -78,11 +135,47 @@ export default function PropietarioFormScreen({ route, navigation }) {
       <Text style={s.label}>Correo</Text>
       <TextInput style={s.input} value={email} onChangeText={setEmail} placeholder="propietario@correo.com" autoCapitalize="none" keyboardType="email-address" />
 
+      <Text style={s.label}>{tipo === 'juridica' ? 'Cédula jurídica' : 'Número de cédula'}</Text>
+      <TextInput style={s.input} value={cedula} onChangeText={setCedula} placeholder="1-2345-6789" />
+
       <Text style={s.label}>Dirección</Text>
       <TextInput style={s.input} value={direccion} onChangeText={setDireccion} placeholder="Dirección exacta" />
 
-      <Text style={s.label}>Nombre de representante legal</Text>
-      <TextInput style={s.input} value={representanteLegal} onChangeText={setRepresentanteLegal} placeholder="Si es una sociedad" />
+      {tipo === 'juridica' && (
+        <View style={s.seccionRep}>
+          <Text style={s.label}>Representante legal</Text>
+          <View style={s.chips}>
+            <TouchableOpacity style={[s.chip, modoRepresentante === 'existente' && s.chipActivo]} onPress={() => setModoRepresentante('existente')}>
+              <Text style={[s.chipText, modoRepresentante === 'existente' && s.chipTextActivo]}>Elegir persona existente</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[s.chip, modoRepresentante === 'nuevo' && s.chipActivo]} onPress={() => setModoRepresentante('nuevo')}>
+              <Text style={[s.chipText, modoRepresentante === 'nuevo' && s.chipTextActivo]}>+ Registrar nueva persona física</Text>
+            </TouchableOpacity>
+          </View>
+
+          {modoRepresentante === 'existente'
+            ? (
+              <View style={[s.chips, { marginTop: 10 }]}>
+                {fisicas.map(f => (
+                  <TouchableOpacity key={f.id} style={[s.chip, representanteLegalId === f.id && s.chipActivo]} onPress={() => setRepresentanteLegalId(f.id)}>
+                    <Text style={[s.chipText, representanteLegalId === f.id && s.chipTextActivo]}>{f.nombre}{f.cedula ? ` (${f.cedula})` : ''}</Text>
+                  </TouchableOpacity>
+                ))}
+                {fisicas.length === 0 && <Text style={s.vacio}>Todavía no hay personas físicas registradas.</Text>}
+              </View>
+            )
+            : (
+              <View style={{ marginTop: 10 }}>
+                <TextInput style={s.input} value={nuevoRepNombre} onChangeText={setNuevoRepNombre} placeholder="Nombre del representante" />
+                <TextInput style={[s.input, { marginTop: 10 }]} value={nuevoRepCedula} onChangeText={setNuevoRepCedula} placeholder="Número de cédula" />
+                <TextInput style={[s.input, { marginTop: 10 }]} value={nuevoRepTelefono} onChangeText={setNuevoRepTelefono} placeholder="Teléfono" keyboardType="phone-pad" />
+                <TextInput style={[s.input, { marginTop: 10 }]} value={nuevoRepEmail} onChangeText={setNuevoRepEmail} placeholder="Correo" autoCapitalize="none" keyboardType="email-address" />
+                <TextInput style={[s.input, { marginTop: 10 }]} value={nuevoRepDireccion} onChangeText={setNuevoRepDireccion} placeholder="Dirección exacta" />
+              </View>
+            )
+          }
+        </View>
+      )}
 
       <Text style={s.label}>Número de cuenta bancaria</Text>
       <TextInput style={s.input} value={numeroCuentaBancaria} onChangeText={setNumeroCuentaBancaria} placeholder="IBAN o número de cuenta" />
@@ -124,6 +217,7 @@ const s = StyleSheet.create({
   chipText: { fontSize: 13, fontWeight: '600', color: '#3d1f0a' },
   chipTextActivo: { color: '#fff' },
   vacio: { color: '#9a8674', fontSize: 13 },
+  seccionRep: { marginTop: 16, backgroundColor: '#efe6db', borderRadius: 12, padding: 14 },
   btn: { backgroundColor: '#1a1a1a', borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 28, marginBottom: 40 },
   btnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });

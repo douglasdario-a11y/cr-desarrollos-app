@@ -57,7 +57,10 @@ export default function PropietariosScreen({ navigation }) {
         renderItem={({ item }) => (
           <TouchableOpacity style={s.card} onPress={() => navigation.navigate('PropietarioDetalle', { id: item.id })}>
             <View style={{ flex: 1 }}>
-              <Text style={s.nombre}>{item.nombre}</Text>
+              <View style={s.filaNombre}>
+                <Text style={s.nombre}>{item.nombre}</Text>
+                {item.tipo === 'juridica' && <View style={s.badgeTipo}><Text style={s.badgeTipoText}>Jurídica</Text></View>}
+              </View>
               <View style={s.detalleFila}>
                 {!!item.telefono && <Text style={s.detalle}>📞 {item.telefono}</Text>}
                 {(item.propiedades || []).map(pr => (
@@ -83,7 +86,10 @@ const s = StyleSheet.create({
   btnNuevaText: { color: '#fff', fontWeight: '600', fontSize: 13 },
   vacio: { textAlign: 'center', color: '#9a8674', marginTop: 40 },
   card: { flexDirection: 'row', backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 12, gap: 10, alignItems: 'center' },
+  filaNombre: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   nombre: { fontSize: 15, fontWeight: '600', color: '#1a1a1a' },
+  badgeTipo: { backgroundColor: '#f5f0eb', borderRadius: 20, paddingVertical: 2, paddingHorizontal: 8 },
+  badgeTipoText: { fontSize: 10, fontWeight: '700', color: '#7a5c3a' },
   detalleFila: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4, alignItems: 'center' },
   detalle: { fontSize: 12, color: '#7a5c3a' },
   propChip: { backgroundColor: '#e8ddd5', borderRadius: 20, paddingVertical: 3, paddingHorizontal: 8 },

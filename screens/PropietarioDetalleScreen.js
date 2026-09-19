@@ -80,7 +80,12 @@ export default function PropietarioDetalleScreen({ route, navigation }) {
   return (
     <View style={s.container}>
       <View style={{ padding: 16 }}>
-        <Text style={s.nombre}>{propietario.nombre}</Text>
+        <View style={s.filaTitulo}>
+          <Text style={s.nombre}>{propietario.nombre}</Text>
+          <View style={s.badgeTipo}>
+            <Text style={s.badgeTipoText}>{propietario.tipo === 'juridica' ? 'Persona jurídica' : 'Persona física'}</Text>
+          </View>
+        </View>
 
         <View style={s.accesosFila}>
           {!!propietario.telefono && (
@@ -107,35 +112,57 @@ export default function PropietarioDetalleScreen({ route, navigation }) {
           {!!propietario.telefono && <Text style={s.textoInfo}>📞 {propietario.telefono}</Text>}
           {!!propietario.email && <Text style={s.textoInfo}>✉️ {propietario.email}</Text>}
           {!!propietario.direccion && <Text style={s.textoInfo}>📍 {propietario.direccion}</Text>}
-          {!!propietario.representante_legal && <Text style={s.textoInfo}>🧑‍⚖️ Representante legal: {propietario.representante_legal}</Text>}
+          {!!propietario.cedula && <Text style={s.textoInfo}>🪪 {propietario.tipo === 'juridica' ? 'Cédula jurídica' : 'Cédula'}: {propietario.cedula}</Text>}
           {!!propietario.numero_cuenta_bancaria && <Text style={s.textoInfo}>🏦 Cuenta bancaria: {propietario.numero_cuenta_bancaria}</Text>}
           {!!propietario.codigo_actividad_economica && <Text style={s.textoInfo}>🏷️ Actividad económica: {propietario.codigo_actividad_economica}</Text>}
         </View>
 
-        <View style={s.seccion}>
-          <Text style={s.seccionTitulo}>Documento de personería jurídica</Text>
-          {propietario.documento_personeria_url
-            ? (
-              <View style={s.docFila}>
-                <TouchableOpacity style={{ flex: 1 }} onPress={() => Linking.openURL(propietario.documento_personeria_url)}>
-                  <Text style={s.docLink}>📄 Ver documento</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={confirmarBorrarDocumento}>
-                  <Text style={s.btnBorrarText}>Borrar</Text>
-                </TouchableOpacity>
-              </View>
-            )
-            : <Text style={s.vacio}>Todavía no se ha subido.</Text>
-          }
-          {subiendo
-            ? <ActivityIndicator style={{ marginTop: 10 }} />
-            : (
-              <TouchableOpacity style={s.btnSubirDoc} onPress={elegirYSubirDocumento}>
-                <Text style={s.btnSubirDocText}>{propietario.documento_personeria_url ? 'Reemplazar documento' : 'Subir documento (PDF o imagen)'}</Text>
+        {propietario.tipo === 'juridica' && !!propietario.representante_legal && (
+          <View style={s.seccion}>
+            <Text style={s.seccionTitulo}>Representante legal</Text>
+            <TouchableOpacity style={s.propFila} onPress={() => navigation.navigate('PropietarioDetalle', { id: propietario.representante_legal.id })}>
+              <Text style={s.propFilaText}>🧑‍⚖️ {propietario.representante_legal.nombre}{propietario.representante_legal.cedula ? ` (${propietario.representante_legal.cedula})` : ''}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {propietario.tipo === 'fisica' && (propietario.sociedades_representadas || []).length > 0 && (
+          <View style={s.seccion}>
+            <Text style={s.seccionTitulo}>Representante legal de</Text>
+            {propietario.sociedades_representadas.map(soc => (
+              <TouchableOpacity key={soc.id} style={s.propFila} onPress={() => navigation.navigate('PropietarioDetalle', { id: soc.id })}>
+                <Text style={s.propFilaText}>🏢 {soc.nombre}</Text>
               </TouchableOpacity>
-            )
-          }
-        </View>
+            ))}
+          </View>
+        )}
+
+        {propietario.tipo === 'juridica' && (
+          <View style={s.seccion}>
+            <Text style={s.seccionTitulo}>Documento de personería jurídica</Text>
+            {propietario.documento_personeria_url
+              ? (
+                <View style={s.docFila}>
+                  <TouchableOpacity style={{ flex: 1 }} onPress={() => Linking.openURL(propietario.documento_personeria_url)}>
+                    <Text style={s.docLink}>📄 Ver documento</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={confirmarBorrarDocumento}>
+                    <Text style={s.btnBorrarText}>Borrar</Text>
+                  </TouchableOpacity>
+                </View>
+              )
+              : <Text style={s.vacio}>Todavía no se ha subido.</Text>
+            }
+            {subiendo
+              ? <ActivityIndicator style={{ marginTop: 10 }} />
+              : (
+                <TouchableOpacity style={s.btnSubirDoc} onPress={elegirYSubirDocumento}>
+                  <Text style={s.btnSubirDocText}>{propietario.documento_personeria_url ? 'Reemplazar documento' : 'Subir documento (PDF o imagen)'}</Text>
+                </TouchableOpacity>
+              )
+            }
+          </View>
+        )}
 
         {!!propietario.notas && (
           <View style={s.seccion}>
@@ -166,7 +193,10 @@ export default function PropietarioDetalleScreen({ route, navigation }) {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f0eb' },
+  filaTitulo: { flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
   nombre: { fontSize: 20, fontWeight: '700', color: '#1a1a1a' },
+  badgeTipo: { backgroundColor: '#fff', borderRadius: 20, paddingVertical: 4, paddingHorizontal: 10 },
+  badgeTipoText: { fontSize: 11, fontWeight: '700', color: '#7a5c3a' },
   accesosFila: { flexDirection: 'row', gap: 10, marginTop: 16 },
   accesoBoton: { flex: 1, backgroundColor: '#fff', borderRadius: 12, paddingVertical: 12, alignItems: 'center', gap: 4 },
   accesoTexto: { fontSize: 12, fontWeight: '600', color: '#3d1f0a' },
