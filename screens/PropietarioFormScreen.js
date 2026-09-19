@@ -56,26 +56,18 @@ export default function PropietarioFormScreen({ route, navigation }) {
 
   async function guardar() {
     if (!nombre.trim()) { Alert.alert('Error', 'El nombre es requerido'); return; }
-    if (!cedula.trim()) { Alert.alert('Error', `El número de cédula${tipo === 'juridica' ? ' jurídica' : ''} es requerido`); return; }
-    if (tipo === 'juridica') {
-      if (modoRepresentante === 'existente' && !representanteLegalId) { Alert.alert('Error', 'Elegí el representante legal'); return; }
-      if (modoRepresentante === 'nuevo' && (!nuevoRepNombre.trim() || !nuevoRepCedula.trim())) {
-        Alert.alert('Error', 'El nombre y la cédula del representante legal son requeridos');
-        return;
-      }
-    }
     setGuardando(true);
     try {
       const token = await AsyncStorage.getItem('token');
-      let repId = tipo === 'juridica' && modoRepresentante === 'existente' ? representanteLegalId : null;
-      if (tipo === 'juridica' && modoRepresentante === 'nuevo') {
+      let repId = tipo === 'juridica' && modoRepresentante === 'existente' && representanteLegalId ? representanteLegalId : null;
+      if (tipo === 'juridica' && modoRepresentante === 'nuevo' && nuevoRepNombre.trim()) {
         const resRep = await fetch(`${API}/propietarios`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
             tipo: 'fisica',
             nombre: nuevoRepNombre.trim(),
-            cedula: nuevoRepCedula.trim(),
+            cedula: nuevoRepCedula.trim() || null,
             telefono: nuevoRepTelefono.trim() || null,
             email: nuevoRepEmail.trim() || null,
             direccion: nuevoRepDireccion.trim() || null,
@@ -90,7 +82,7 @@ export default function PropietarioFormScreen({ route, navigation }) {
         nombre: nombre.trim(),
         telefono: telefono.trim() || null,
         email: email.trim() || null,
-        cedula: cedula.trim(),
+        cedula: cedula.trim() || null,
         representante_legal_id: repId,
         direccion: direccion.trim() || null,
         numero_cuenta_bancaria: numeroCuentaBancaria.trim() || null,
