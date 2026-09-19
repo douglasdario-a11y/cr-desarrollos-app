@@ -124,14 +124,29 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
 
   function resumenTexto() {
     const c = propiedad.caracteristicas || {};
+    const cocinaLabel = COCINA_OPCIONES.find(op => op.value === c.cocina)?.label;
+    const espaciosTexto = [
+      ...ESPACIOS.filter(e => c[e.key]).map(e => e.label),
+      ...espaciosPersonalizados(c),
+    ];
+    const amenidadesTexto = amenidadesEfectivas(c);
     const partes = [
       propiedad.titulo,
       propiedad.tipo_propiedad,
-      propiedad.precio != null ? `Precio: ${fmtColones(propiedad.precio)}` : null,
+      propiedad.en_venta && propiedad.precio != null ? `Precio de venta: ${fmtColones(propiedad.precio)}` : null,
+      propiedad.en_alquiler && propiedad.precio_alquiler != null ? `Precio de alquiler: ${fmtColones(propiedad.precio_alquiler)} / mes` : null,
+      propiedad.cuota_mantenimiento != null ? `Cuota de mantenimiento: ${fmtColones(propiedad.cuota_mantenimiento)} / mes` : null,
       c.habitaciones != null ? `${c.habitaciones} habitaciones` : null,
       c.banos != null ? `${c.banos} baños` : null,
+      c.vehiculos != null ? `${c.vehiculos} espacios de parqueo` : null,
+      cocinaLabel ? `Cocina: ${cocinaLabel}` : null,
+      fmtM2(c.area_terreno) ? `Área de terreno: ${fmtM2(c.area_terreno)}` : null,
+      fmtM2(c.area_construccion) ? `Área de construcción: ${fmtM2(c.area_construccion)}` : null,
+      espaciosTexto.length ? `Espacios: ${espaciosTexto.join(', ')}` : null,
+      amenidadesTexto.length ? `Amenidades: ${amenidadesTexto.join(', ')}` : null,
       propiedad.descripcion,
       propiedad.ubicacion ? `Ubicación: ${propiedad.ubicacion}` : null,
+      [propiedad.distrito, propiedad.canton, propiedad.provincia].filter(Boolean).join(', ') || null,
       propiedad.maps_link,
     ].filter(Boolean);
     return partes.join('\n');
