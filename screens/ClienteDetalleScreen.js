@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { API } from '../utils/api';
-import { etapaLabel } from '../utils/crm';
+import { etapaLabel, estadoCita, fmtFechaHora } from '../utils/crm';
 
 function numeroWhatsapp(telefono) {
   const digitos = (telefono || '').replace(/\D/g, '');
@@ -15,15 +15,22 @@ function numeroWhatsapp(telefono) {
 export default function ClienteDetalleScreen({ route, navigation }) {
   const { id } = route.params;
   const [cliente, setCliente] = useState(null);
+  const [citas, setCitas] = useState([]);
   const [loading, setLoading] = useState(true);
 
   async function cargar() {
     try {
       const token = await AsyncStorage.getItem('token');
-      const res = await fetch(`${API}/clientes/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      const headers = { Authorization: `Bearer ${token}` };
+      const [res, resCitas] = await Promise.all([
+        fetch(`${API}/clientes/${id}`, { headers }),
+        fetch(`${API}/citas`, { headers }),
+      ]);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error cargando el cliente');
       setCliente(data);
+      const dataCitas = await resCitas.json();
+      setCitas(resCitas.ok && Array.isArray(dataCitas) ? dataCitas.filter(c => String(c.cliente_id) === String(id)) : []);
     } catch (e) {
       Alert.alert('Error', e.message);
     } finally {
@@ -36,6 +43,7 @@ export default function ClienteDetalleScreen({ route, navigation }) {
   if (loading || !cliente) return <ActivityIndicator size="large" style={{ flex: 1 }} />;
 
   const whatsapp = numeroWhatsapp(cliente.telefono);
+  const citasOrdenadas = [...citas].sort((a, b) => b.fecha_hora.localeCompare(a.fecha_hora));
 
   return (
     <View style={s.container}>
@@ -80,6 +88,27 @@ export default function ClienteDetalleScreen({ route, navigation }) {
           </View>
         )}
 
+        <View style={s.seccion}>
+          <Text style={s.seccionTitulo}>Citas ({citasOrdenadas.length})</Text>
+          {citasOrdenadas.length === 0
+            ? <Text style={s.vacio}>Todavía no hay citas con este cliente.</Text>
+            : citasOrdenadas.map(c => {
+                const est = estadoCita(c.estado);
+                return (
+                  <TouchableOpacity key={c.id} style={s.citaFila} onPress={() => navigation.navigate('CitaForm', { cita: c })}>
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                      <Text style={s.citaFecha}>{fmtFechaHora(c.fecha_hora)}</Text>
+                      {!!c.propiedad_titulo && <Text style={s.citaDetalle}>🏠 {c.propiedad_titulo}</Text>}
+                    </View>
+                    <View style={[s.estadoChip, { backgroundColor: est.color }]}>
+                      <Text style={s.estadoChipText}>{est.label}</Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })
+          }
+        </View>
+
         <TouchableOpacity style={s.btnSecundario} onPress={() => navigation.navigate('ClienteForm', { cliente })}>
           <Text style={s.btnSecundarioText}>Editar información</Text>
         </TouchableOpacity>
@@ -101,6 +130,12 @@ const s = StyleSheet.create({
   seccionTitulo: { fontSize: 15, fontWeight: '600', color: '#1a1a1a', marginBottom: 8 },
   textoInfo: { fontSize: 13, color: '#7a5c3a', marginBottom: 6 },
   notas: { fontSize: 14, color: '#333', lineHeight: 20 },
+  vacio: { color: '#9a8674', fontSize: 13 },
+  citaFila: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 10 },
+  citaFecha: { fontSize: 14, fontWeight: '700', color: '#1a1a1a' },
+  citaDetalle: { fontSize: 12, color: '#7a5c3a', marginTop: 2 },
+  estadoChip: { borderRadius: 20, paddingVertical: 5, paddingHorizontal: 10 },
+  estadoChipText: { color: '#fff', fontSize: 11, fontWeight: '700' },
   btnSecundario: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#1a1a1a', borderRadius: 10, padding: 12, alignItems: 'center', marginTop: 24 },
   btnSecundarioText: { color: '#1a1a1a', fontWeight: '600' },
 });
