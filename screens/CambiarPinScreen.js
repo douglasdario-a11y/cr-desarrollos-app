@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API } from '../utils/api';
+import { COLORES, ESTILOS_FORM } from '../utils/theme';
 
 export default function CambiarPinScreen({ navigation }) {
   const [actual, setActual] = useState('');
@@ -32,7 +33,7 @@ export default function CambiarPinScreen({ navigation }) {
   }
 
   return (
-    <View style={s.container}>
+    <View style={[s.container, { padding: 16 }]}>
       <Text style={s.label}>PIN actual</Text>
       <TextInput style={s.input} value={actual} onChangeText={t => setActual(t.replace(/\D/g, ''))} secureTextEntry keyboardType="number-pad" maxLength={6} />
 
@@ -43,7 +44,7 @@ export default function CambiarPinScreen({ navigation }) {
       <TextInput style={s.input} value={confirmar} onChangeText={t => setConfirmar(t.replace(/\D/g, ''))} secureTextEntry keyboardType="number-pad" maxLength={6} />
 
       {guardando
-        ? <ActivityIndicator size="large" style={{ marginTop: 20 }} />
+        ? <ActivityIndicator size="large" color={COLORES.acento} style={{ marginTop: 20 }} />
         : <TouchableOpacity style={s.btn} onPress={guardar}>
             <Text style={s.btnText}>Guardar PIN nuevo</Text>
           </TouchableOpacity>
@@ -53,9 +54,5 @@ export default function CambiarPinScreen({ navigation }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f0eb', padding: 16 },
-  label: { fontSize: 13, fontWeight: '600', color: '#7a5c3a', marginBottom: 6, marginTop: 16 },
-  input: { backgroundColor: '#fff', color: '#1a1a1a', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 10, padding: 12, fontSize: 15 },
-  btn: { backgroundColor: '#1a1a1a', borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 28 },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  ...ESTILOS_FORM,
 });

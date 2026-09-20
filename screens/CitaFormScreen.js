@@ -6,6 +6,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { API } from '../utils/api';
 import { ESTADOS_CITA, partirFechaHora } from '../utils/crm';
 import { sincronizarCita } from '../utils/calendarSync';
+import { ESTILOS_FORM } from '../utils/theme';
 
 function fechaInicial(existente, fechaParam) {
   if (existente?.fecha_hora) return new Date(existente.fecha_hora);
@@ -188,18 +189,7 @@ export default function CitaFormScreen({ route, navigation }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f0eb' },
-  label: { fontSize: 13, fontWeight: '600', color: '#7a5c3a', marginBottom: 6, marginTop: 16 },
-  input: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 10, padding: 12, justifyContent: 'center' },
-  inputTexto: { color: '#1a1a1a', fontSize: 15 },
-  textarea: { minHeight: 80, textAlignVertical: 'top' },
-  fila: { flexDirection: 'row', gap: 10 },
-  filaItem: { flex: 1 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
-  chipActivo: { backgroundColor: '#3d1f0a', borderColor: '#3d1f0a' },
-  chipText: { fontSize: 13, fontWeight: '600', color: '#3d1f0a' },
-  chipTextActivo: { color: '#fff' },
-  btn: { backgroundColor: '#1a1a1a', borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 28, marginBottom: 40 },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  ...ESTILOS_FORM,
+  input: { ...ESTILOS_FORM.input, justifyContent: 'center' },
+  inputTexto: { color: ESTILOS_FORM.input.color, fontSize: 15 },
 });

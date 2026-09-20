@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert,
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { API } from '../utils/api';
+import { COLORES, ESTILOS_FORM } from '../utils/theme';
 
 export default function PropietarioFormScreen({ route, navigation }) {
   const existente = route.params?.propietario;
@@ -195,17 +196,6 @@ export default function PropietarioFormScreen({ route, navigation }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f0eb' },
-  label: { fontSize: 13, fontWeight: '600', color: '#7a5c3a', marginBottom: 6, marginTop: 16 },
-  input: { backgroundColor: '#fff', color: '#1a1a1a', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 10, padding: 12, fontSize: 15 },
-  textarea: { minHeight: 80, textAlignVertical: 'top' },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
-  chipActivo: { backgroundColor: '#3d1f0a', borderColor: '#3d1f0a' },
-  chipText: { fontSize: 13, fontWeight: '600', color: '#3d1f0a' },
-  chipTextActivo: { color: '#fff' },
-  vacio: { color: '#9a8674', fontSize: 13 },
-  seccionRep: { marginTop: 16, backgroundColor: '#efe6db', borderRadius: 12, padding: 14 },
-  btn: { backgroundColor: '#1a1a1a', borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 28, marginBottom: 40 },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  ...ESTILOS_FORM,
+  seccionRep: { marginTop: 16, backgroundColor: COLORES.fondo, borderRadius: 14, padding: 14 },
 });

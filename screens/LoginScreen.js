@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API } from '../utils/api';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { COLORES, FUENTE_TITULO, FUENTE_CUERPO_600, FUENTE_CUERPO_700 } from '../utils/theme';
 
 export default function LoginScreen({ onLogin }) {
   const [pin, setPin] = useState('');
@@ -43,7 +45,10 @@ export default function LoginScreen({ onLogin }) {
   return (
     <View style={s.container}>
       <View style={s.card}>
-        <Text style={s.titulo}>Sistema de Registro Inmobiliario</Text>
+        <View style={s.marcaIcono}>
+          <MaterialCommunityIcons name="home-city" size={22} color="#fff" />
+        </View>
+        <Text style={s.titulo}>CR Desarrollos</Text>
         <Text style={s.sub}>Ingresá tu PIN</Text>
 
         <View style={s.pinDisplay}>
@@ -68,7 +73,7 @@ export default function LoginScreen({ onLogin }) {
         </View>
 
         {loading
-          ? <ActivityIndicator size="large" color="#1a1a1a" style={{ marginTop: 16 }} />
+          ? <ActivityIndicator size="large" color={COLORES.acento} style={{ marginTop: 16 }} />
           : <TouchableOpacity style={[s.btn, pin.length < 4 && s.btnDeshabilitado]} onPress={entrar} disabled={pin.length < 4}>
               <Text style={s.btnText}>Entrar</Text>
             </TouchableOpacity>
@@ -79,21 +84,22 @@ export default function LoginScreen({ onLogin }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, backgroundColor: '#f5f0eb' },
-  card: { backgroundColor: '#fff', borderRadius: 20, padding: 28, width: '100%', maxWidth: 360, alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 12, elevation: 4 },
-  titulo: { fontSize: 17, fontWeight: '700', color: '#1a1a1a', textAlign: 'center' },
-  sub: { fontSize: 14, color: '#7a5c3a', fontWeight: '500', marginTop: 4, marginBottom: 20 },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, backgroundColor: COLORES.fondo },
+  card: { backgroundColor: COLORES.superficie, borderRadius: 24, padding: 28, width: '100%', maxWidth: 360, alignItems: 'center', shadowColor: '#241C15', shadowOpacity: 0.1, shadowRadius: 16, elevation: 4 },
+  marcaIcono: { width: 44, height: 44, borderRadius: 14, backgroundColor: COLORES.acento, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  titulo: { fontFamily: FUENTE_TITULO, fontSize: 19, color: COLORES.tinta, textAlign: 'center' },
+  sub: { fontSize: 14, color: COLORES.muted, fontFamily: FUENTE_CUERPO_600, marginTop: 4, marginBottom: 20 },
   pinDisplay: { flexDirection: 'row', gap: 10, marginBottom: 12 },
-  pinDot: { width: 12, height: 12, borderRadius: 6, borderWidth: 2, borderColor: '#b8a99a' },
-  pinDotFull: { backgroundColor: '#3d1f0a', borderColor: '#3d1f0a' },
-  error: { color: '#ef4444', fontSize: 13, marginBottom: 8, textAlign: 'center' },
+  pinDot: { width: 12, height: 12, borderRadius: 6, borderWidth: 2, borderColor: COLORES.bordeFuerte },
+  pinDotFull: { backgroundColor: COLORES.acento, borderColor: COLORES.acento },
+  error: { color: COLORES.peligro, fontSize: 13, marginBottom: 8, textAlign: 'center' },
   teclado: { flexDirection: 'row', flexWrap: 'wrap', width: 260, justifyContent: 'space-between', marginTop: 8 },
-  tecla: { width: 76, height: 56, borderRadius: 10, backgroundColor: '#f5f0eb', borderWidth: 1, borderColor: '#e8ddd5', alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
+  tecla: { width: 76, height: 56, borderRadius: 14, backgroundColor: COLORES.fondo, borderWidth: 1, borderColor: COLORES.borde, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
   teclaVacia: { backgroundColor: 'transparent', borderWidth: 0 },
-  teclaDel: { backgroundColor: '#fee2e2', borderColor: '#fca5a5' },
-  teclaText: { fontSize: 20, fontWeight: '600', color: '#3d1f0a' },
-  teclaDelText: { fontSize: 18, fontWeight: '600', color: '#ef4444' },
-  btn: { backgroundColor: '#1a1a1a', borderRadius: 10, padding: 14, alignItems: 'center', width: '100%', marginTop: 8 },
+  teclaDel: { backgroundColor: COLORES.peligroFondo, borderColor: '#F3C6C2' },
+  teclaText: { fontSize: 20, fontFamily: FUENTE_CUERPO_600, color: COLORES.tinta },
+  teclaDelText: { fontSize: 18, fontFamily: FUENTE_CUERPO_600, color: COLORES.peligro },
+  btn: { backgroundColor: COLORES.acento, borderRadius: 14, padding: 14, alignItems: 'center', width: '100%', marginTop: 8 },
   btnDeshabilitado: { opacity: 0.4 },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  btnText: { color: '#fff', fontSize: 16, fontFamily: FUENTE_CUERPO_600 },
 });

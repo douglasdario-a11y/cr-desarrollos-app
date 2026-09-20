@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API } from '../utils/api';
+import { COLORES, ESTILOS_FORM } from '../utils/theme';
 
 export default function UsuarioFormScreen({ route, navigation }) {
   const existente = route.params?.usuario;
@@ -71,10 +72,6 @@ export default function UsuarioFormScreen({ route, navigation }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f0eb' },
-  label: { fontSize: 13, fontWeight: '600', color: '#7a5c3a', marginBottom: 6, marginTop: 16 },
-  input: { backgroundColor: '#fff', color: '#1a1a1a', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 10, padding: 12, fontSize: 15 },
-  error: { color: '#ef4444', fontSize: 13, marginTop: 12 },
-  btn: { backgroundColor: '#1a1a1a', borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 28, marginBottom: 40 },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  ...ESTILOS_FORM,
+  error: { color: COLORES.peligro, fontSize: 13, marginTop: 12 },
 });

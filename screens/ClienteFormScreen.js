@@ -5,6 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { API } from '../utils/api';
 import { ETAPAS_CLIENTE } from '../utils/crm';
 import { sincronizarContacto, elegirDeContactos } from '../utils/contactosSync';
+import { COLORES, ESTILOS_FORM } from '../utils/theme';
 
 export default function ClienteFormScreen({ route, navigation }) {
   const existente = route.params?.cliente;
@@ -146,17 +147,7 @@ export default function ClienteFormScreen({ route, navigation }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f0eb' },
-  label: { fontSize: 13, fontWeight: '600', color: '#7a5c3a', marginBottom: 6, marginTop: 16 },
-  input: { backgroundColor: '#fff', color: '#1a1a1a', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 10, padding: 12, fontSize: 15 },
-  textarea: { minHeight: 80, textAlignVertical: 'top' },
-  btnContactos: { alignSelf: 'flex-start', backgroundColor: '#e8ddd5', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
-  btnContactosText: { fontSize: 13, fontWeight: '600', color: '#3d1f0a' },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
-  chipActivo: { backgroundColor: '#3d1f0a', borderColor: '#3d1f0a' },
-  chipText: { fontSize: 13, fontWeight: '600', color: '#3d1f0a' },
-  chipTextActivo: { color: '#fff' },
-  btn: { backgroundColor: '#1a1a1a', borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 28, marginBottom: 40 },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  ...ESTILOS_FORM,
+  btnContactos: { alignSelf: 'flex-start', backgroundColor: COLORES.chipFondo, borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
+  btnContactosText: { fontSize: 13, fontFamily: ESTILOS_FORM.label.fontFamily, color: COLORES.muted },
 });

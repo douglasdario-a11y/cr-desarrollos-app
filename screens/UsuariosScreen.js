@@ -3,6 +3,7 @@ import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { API } from '../utils/api';
+import { COLORES, FUENTE_TITULO, FUENTE_CUERPO_600, FUENTE_CUERPO_700 } from '../utils/theme';
 
 export default function UsuariosScreen({ navigation }) {
   const [usuarios, setUsuarios] = useState([]);
@@ -52,7 +53,7 @@ export default function UsuariosScreen({ navigation }) {
     cargar();
   }
 
-  if (loading) return <ActivityIndicator size="large" style={{ flex: 1 }} />;
+  if (loading) return <ActivityIndicator size="large" color={COLORES.acento} style={{ flex: 1 }} />;
 
   return (
     <View style={s.container}>
@@ -93,21 +94,21 @@ export default function UsuariosScreen({ navigation }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f0eb' },
+  container: { flex: 1, backgroundColor: COLORES.fondo },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingBottom: 0 },
-  headerTitulo: { fontSize: 22, fontWeight: '700', color: '#1a1a1a' },
-  btnNueva: { backgroundColor: '#1a1a1a', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
-  btnNuevaText: { color: '#fff', fontWeight: '600', fontSize: 13 },
-  vacio: { textAlign: 'center', color: '#9a8674', marginTop: 40 },
-  card: { flexDirection: 'row', backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 12, gap: 10, alignItems: 'center', flexWrap: 'wrap' },
-  nombre: { fontSize: 15, fontWeight: '600', color: '#1a1a1a' },
-  detalle: { fontSize: 12, color: '#7a5c3a', marginTop: 2 },
+  headerTitulo: { fontFamily: FUENTE_TITULO, fontSize: 26, color: COLORES.tinta },
+  btnNueva: { backgroundColor: COLORES.acento, borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
+  btnNuevaText: { color: '#fff', fontFamily: FUENTE_CUERPO_600, fontSize: 13 },
+  vacio: { textAlign: 'center', color: COLORES.muted, marginTop: 40 },
+  card: { flexDirection: 'row', backgroundColor: COLORES.superficie, borderRadius: 16, padding: 14, marginBottom: 12, gap: 10, alignItems: 'center', flexWrap: 'wrap', borderWidth: 1, borderColor: COLORES.borde },
+  nombre: { fontFamily: FUENTE_TITULO, fontSize: 15, color: COLORES.tinta },
+  detalle: { fontSize: 12, color: COLORES.muted, marginTop: 2 },
   estadoChip: { borderRadius: 20, paddingVertical: 4, paddingHorizontal: 10 },
-  estadoChipText: { fontSize: 11, fontWeight: '700' },
-  estadoActivo: { backgroundColor: '#e6f4ea' },
-  estadoActivoText: { color: '#1a6b3a' },
-  estadoInactivo: { backgroundColor: '#f1e9e2' },
-  estadoInactivoText: { color: '#9a8674' },
-  btnAccionText: { fontSize: 12, fontWeight: '600', color: '#3d1f0a' },
-  btnBorrarText: { fontSize: 12, fontWeight: '600', color: '#b3261e' },
+  estadoChipText: { fontSize: 11, fontFamily: FUENTE_CUERPO_700 },
+  estadoActivo: { backgroundColor: COLORES.exitoFondo },
+  estadoActivoText: { color: COLORES.exito },
+  estadoInactivo: { backgroundColor: COLORES.chipFondo },
+  estadoInactivoText: { color: COLORES.muted },
+  btnAccionText: { fontSize: 12, fontFamily: FUENTE_CUERPO_600, color: COLORES.acento },
+  btnBorrarText: { fontSize: 12, fontFamily: FUENTE_CUERPO_600, color: COLORES.peligro },
 });

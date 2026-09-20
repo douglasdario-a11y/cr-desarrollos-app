@@ -6,6 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { API } from '../utils/api';
 import { ESPACIOS, COCINA_OPCIONES, AMENIDADES_SUGERIDAS, amenidadesEfectivas, espaciosPersonalizados } from '../utils/caracteristicas';
 import { PROVINCIAS, cantonesDe, distritosDe } from '../utils/ubicacionCR';
+import { COLORES, ESTILOS_FORM } from '../utils/theme';
 
 export default function PropiedadFormScreen({ route, navigation }) {
   const existente = route.params?.propiedad;
@@ -197,7 +198,7 @@ export default function PropiedadFormScreen({ route, navigation }) {
           </TouchableOpacity>
         ))}
         <TouchableOpacity style={s.chipAgregar} onPress={() => setAgregandoTipo(v => !v)}>
-          <MaterialCommunityIcons name="plus" size={16} color="#3d1f0a" />
+          <MaterialCommunityIcons name="plus" size={16} color={COLORES.acento} />
           <Text style={s.chipAgregarText}>Nuevo tipo</Text>
         </TouchableOpacity>
       </View>
@@ -344,7 +345,7 @@ export default function PropiedadFormScreen({ route, navigation }) {
             style={[s.chip, espacios[e.key] && s.chipActivo]}
             onPress={() => toggleEspacio(e.key)}
           >
-            <MaterialCommunityIcons name={e.icon} size={16} color={espacios[e.key] ? '#fff' : '#3d1f0a'} />
+            <MaterialCommunityIcons name={e.icon} size={16} color={espacios[e.key] ? '#fff' : COLORES.acento} />
             <Text style={[s.chipText, espacios[e.key] && s.chipTextActivo]}>{e.label}</Text>
             {espacios[e.key] && <MaterialCommunityIcons name="check" size={14} color="#fff" />}
           </TouchableOpacity>
@@ -391,7 +392,7 @@ export default function PropiedadFormScreen({ route, navigation }) {
       <View style={[s.chips, { marginTop: amenidades.length > 0 ? 8 : 0 }]}>
         {AMENIDADES_SUGERIDAS.filter(sug => !amenidades.includes(sug)).map(sug => (
           <TouchableOpacity key={sug} style={s.chipAgregar} onPress={() => agregarAmenidad(sug)}>
-            <MaterialCommunityIcons name="plus" size={16} color="#3d1f0a" />
+            <MaterialCommunityIcons name="plus" size={16} color={COLORES.acento} />
             <Text style={s.chipAgregarText}>{sug}</Text>
           </TouchableOpacity>
         ))}
@@ -445,23 +446,12 @@ export default function PropiedadFormScreen({ route, navigation }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f0eb' },
-  label: { fontSize: 13, fontWeight: '600', color: '#7a5c3a', marginBottom: 6, marginTop: 16 },
-  input: { backgroundColor: '#fff', color: '#1a1a1a', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 10, padding: 12, fontSize: 15 },
-  textarea: { minHeight: 80, textAlignVertical: 'top' },
-  fila: { flexDirection: 'row', gap: 10 },
-  filaItem: { flex: 1 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#fff', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
-  chipActivo: { backgroundColor: '#3d1f0a', borderColor: '#3d1f0a' },
-  chipText: { fontSize: 13, fontWeight: '600', color: '#3d1f0a' },
-  chipTextActivo: { color: '#fff' },
-  chipAgregar: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: '#3d1f0a', borderStyle: 'dashed', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
-  chipAgregarText: { fontSize: 13, fontWeight: '600', color: '#3d1f0a' },
-  chipQuitable: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#3d1f0a', borderRadius: 20, paddingVertical: 8, paddingLeft: 14, paddingRight: 10 },
-  chipQuitableText: { fontSize: 13, fontWeight: '600', color: '#fff' },
+  ...ESTILOS_FORM,
+  chip: { ...ESTILOS_FORM.chip, flexDirection: 'row', alignItems: 'center', gap: 6 },
+  chipAgregar: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: COLORES.acento, borderStyle: 'dashed', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
+  chipAgregarText: { fontSize: 13, fontFamily: ESTILOS_FORM.chipText.fontFamily, color: COLORES.acento },
+  chipQuitable: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: COLORES.acento, borderRadius: 20, paddingVertical: 8, paddingLeft: 14, paddingRight: 10 },
+  chipQuitableText: { fontSize: 13, fontFamily: ESTILOS_FORM.chipText.fontFamily, color: '#fff' },
   filaAgregarTipo: { flexDirection: 'row', gap: 8, marginTop: 8, alignItems: 'center' },
-  btnGuardarTipo: { backgroundColor: '#3d1f0a', borderRadius: 10, padding: 12 },
-  btn: { backgroundColor: '#1a1a1a', borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 28, marginBottom: 40 },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  btnGuardarTipo: { backgroundColor: COLORES.acento, borderRadius: 12, padding: 12 },
 });
