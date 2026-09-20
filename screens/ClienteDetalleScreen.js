@@ -4,7 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { API } from '../utils/api';
-import { etapaLabel, estadoCita, fmtFechaHora } from '../utils/crm';
+import { etapaLabel, etapaColores, estadoCita, fmtFechaHora } from '../utils/crm';
+import { COLORES, FUENTE_TITULO, FUENTE_CUERPO_600, FUENTE_CUERPO_700 } from '../utils/theme';
 
 function numeroWhatsapp(telefono) {
   const digitos = (telefono || '').replace(/\D/g, '');
@@ -44,19 +45,20 @@ export default function ClienteDetalleScreen({ route, navigation }) {
 
   const whatsapp = numeroWhatsapp(cliente.telefono);
   const citasOrdenadas = [...citas].sort((a, b) => b.fecha_hora.localeCompare(a.fecha_hora));
+  const et = etapaColores(cliente.etapa);
 
   return (
     <View style={s.container}>
       <View style={{ padding: 16 }}>
         <View style={s.tituloFila}>
           <Text style={[s.nombre, { flex: 1 }]}>{cliente.nombre_cliente}</Text>
-          <View style={s.etapaChip}><Text style={s.etapaChipText}>{etapaLabel(cliente.etapa)}</Text></View>
+          <View style={[s.etapaChip, { backgroundColor: et.bg }]}><Text style={[s.etapaChipText, { color: et.color }]}>{etapaLabel(cliente.etapa)}</Text></View>
         </View>
 
         <View style={s.accesosFila}>
           {!!cliente.telefono && (
             <TouchableOpacity style={s.accesoBoton} onPress={() => Linking.openURL(`tel:${cliente.telefono}`)}>
-              <MaterialCommunityIcons name="phone" size={22} color="#3d1f0a" />
+              <MaterialCommunityIcons name="phone" size={22} color={COLORES.acento} />
               <Text style={s.accesoTexto}>Llamar</Text>
             </TouchableOpacity>
           )}
@@ -68,7 +70,7 @@ export default function ClienteDetalleScreen({ route, navigation }) {
           )}
           {!!cliente.email && (
             <TouchableOpacity style={s.accesoBoton} onPress={() => Linking.openURL(`mailto:${cliente.email}`)}>
-              <MaterialCommunityIcons name="email" size={22} color="#3d1f0a" />
+              <MaterialCommunityIcons name="email" size={22} color={COLORES.acento} />
               <Text style={s.accesoTexto}>Correo</Text>
             </TouchableOpacity>
           )}
@@ -118,24 +120,24 @@ export default function ClienteDetalleScreen({ route, navigation }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f0eb' },
+  container: { flex: 1, backgroundColor: COLORES.fondo },
   tituloFila: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  nombre: { fontSize: 20, fontWeight: '700', color: '#1a1a1a' },
-  etapaChip: { backgroundColor: '#e8ddd5', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 10 },
-  etapaChipText: { fontSize: 11, fontWeight: '700', color: '#3d1f0a' },
+  nombre: { fontFamily: FUENTE_TITULO, fontSize: 22, color: COLORES.tinta },
+  etapaChip: { backgroundColor: COLORES.chipFondo, borderRadius: 20, paddingVertical: 5, paddingHorizontal: 10 },
+  etapaChipText: { fontSize: 11, fontFamily: FUENTE_CUERPO_700, color: COLORES.muted },
   accesosFila: { flexDirection: 'row', gap: 10, marginTop: 16 },
-  accesoBoton: { flex: 1, backgroundColor: '#fff', borderRadius: 12, paddingVertical: 12, alignItems: 'center', gap: 4 },
-  accesoTexto: { fontSize: 12, fontWeight: '600', color: '#3d1f0a' },
+  accesoBoton: { flex: 1, backgroundColor: COLORES.superficie, borderRadius: 14, paddingVertical: 12, alignItems: 'center', gap: 4, borderWidth: 1, borderColor: COLORES.borde },
+  accesoTexto: { fontSize: 12, fontFamily: FUENTE_CUERPO_600, color: COLORES.tinta },
   seccion: { marginTop: 20 },
-  seccionTitulo: { fontSize: 15, fontWeight: '600', color: '#1a1a1a', marginBottom: 8 },
-  textoInfo: { fontSize: 13, color: '#7a5c3a', marginBottom: 6 },
-  notas: { fontSize: 14, color: '#333', lineHeight: 20 },
-  vacio: { color: '#9a8674', fontSize: 13 },
-  citaFila: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 10 },
-  citaFecha: { fontSize: 14, fontWeight: '700', color: '#1a1a1a' },
-  citaDetalle: { fontSize: 12, color: '#7a5c3a', marginTop: 2 },
+  seccionTitulo: { fontFamily: FUENTE_TITULO, fontSize: 16, color: COLORES.tinta, marginBottom: 8 },
+  textoInfo: { fontSize: 13, color: COLORES.muted, marginBottom: 6 },
+  notas: { fontSize: 14, color: COLORES.tinta, lineHeight: 20 },
+  vacio: { color: COLORES.muted, fontSize: 13 },
+  citaFila: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: COLORES.superficie, borderRadius: 16, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: COLORES.borde },
+  citaFecha: { fontSize: 14, fontFamily: FUENTE_CUERPO_700, color: COLORES.tinta },
+  citaDetalle: { fontSize: 12, color: COLORES.muted, marginTop: 2 },
   estadoChip: { borderRadius: 20, paddingVertical: 5, paddingHorizontal: 10 },
-  estadoChipText: { color: '#fff', fontSize: 11, fontWeight: '700' },
-  btnSecundario: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#1a1a1a', borderRadius: 10, padding: 12, alignItems: 'center', marginTop: 24 },
-  btnSecundarioText: { color: '#1a1a1a', fontWeight: '600' },
+  estadoChipText: { color: '#fff', fontSize: 11, fontFamily: FUENTE_CUERPO_700 },
+  btnSecundario: { backgroundColor: COLORES.acento, borderRadius: 14, padding: 14, alignItems: 'center', marginTop: 24 },
+  btnSecundarioText: { color: '#fff', fontFamily: FUENTE_CUERPO_600, fontSize: 14 },
 });

@@ -3,6 +3,7 @@ import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { API } from '../utils/api';
+import { COLORES, FUENTE_TITULO, FUENTE_CUERPO_600, FUENTE_CUERPO_700 } from '../utils/theme';
 
 export default function PropietariosScreen({ navigation }) {
   const [propietarios, setPropietarios] = useState([]);
@@ -79,20 +80,20 @@ export default function PropietariosScreen({ navigation }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f0eb' },
+  container: { flex: 1, backgroundColor: COLORES.fondo },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingBottom: 0 },
-  headerTitulo: { fontSize: 22, fontWeight: '700', color: '#1a1a1a' },
-  btnNueva: { backgroundColor: '#1a1a1a', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
-  btnNuevaText: { color: '#fff', fontWeight: '600', fontSize: 13 },
-  vacio: { textAlign: 'center', color: '#9a8674', marginTop: 40 },
-  card: { flexDirection: 'row', backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 12, gap: 10, alignItems: 'center' },
+  headerTitulo: { fontFamily: FUENTE_TITULO, fontSize: 26, color: COLORES.tinta },
+  btnNueva: { backgroundColor: COLORES.acento, borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
+  btnNuevaText: { color: '#fff', fontFamily: FUENTE_CUERPO_600, fontSize: 13 },
+  vacio: { textAlign: 'center', color: COLORES.muted, marginTop: 40 },
+  card: { flexDirection: 'row', backgroundColor: COLORES.superficie, borderRadius: 16, padding: 14, marginBottom: 12, gap: 10, alignItems: 'center', borderWidth: 1, borderColor: COLORES.borde },
   filaNombre: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  nombre: { fontSize: 15, fontWeight: '600', color: '#1a1a1a' },
-  badgeTipo: { backgroundColor: '#f5f0eb', borderRadius: 20, paddingVertical: 2, paddingHorizontal: 8 },
-  badgeTipoText: { fontSize: 10, fontWeight: '700', color: '#7a5c3a' },
+  nombre: { fontFamily: FUENTE_TITULO, fontSize: 15, color: COLORES.tinta },
+  badgeTipo: { backgroundColor: COLORES.acento, borderRadius: 20, paddingVertical: 2, paddingHorizontal: 8 },
+  badgeTipoText: { fontSize: 10, fontFamily: FUENTE_CUERPO_700, color: '#fff' },
   detalleFila: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4, alignItems: 'center' },
-  detalle: { fontSize: 12, color: '#7a5c3a' },
-  propChip: { backgroundColor: '#e8ddd5', borderRadius: 20, paddingVertical: 3, paddingHorizontal: 8 },
-  propChipText: { fontSize: 11, fontWeight: '600', color: '#3d1f0a' },
-  btnBorrarText: { fontSize: 12, fontWeight: '600', color: '#b3261e' },
+  detalle: { fontSize: 12, color: COLORES.muted },
+  propChip: { backgroundColor: COLORES.chipFondo, borderRadius: 20, paddingVertical: 3, paddingHorizontal: 8 },
+  propChipText: { fontSize: 11, fontFamily: FUENTE_CUERPO_600, color: COLORES.muted },
+  btnBorrarText: { fontSize: 12, fontFamily: FUENTE_CUERPO_600, color: COLORES.peligro },
 });

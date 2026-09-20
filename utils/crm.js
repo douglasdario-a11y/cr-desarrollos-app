@@ -15,11 +15,24 @@ export function etapaLabel(value) {
   return ETAPAS_CLIENTE.find(e => e.value === value)?.label || value;
 }
 
+// Color por etapa del embudo, para que el chip se pueda leer de un vistazo
+// sin abrir la ficha del cliente.
+export function etapaColores(value) {
+  switch (value) {
+    case 'visita_agendada': return { bg: '#DCE4EE', color: '#4C6E8F' };
+    case 'visita_hecha': return { bg: '#E1EEE3', color: '#3F6B4C' };
+    case 'seguimiento': return { bg: '#EDE3F0', color: '#7A5A82' };
+    case 'vendido': return { bg: '#2F6B45', color: '#FFFFFF' };
+    case 'perdido': return { bg: '#FBEAEA', color: '#B3261E' };
+    default: return { bg: '#F3E9DC', color: '#6B5D4E' };
+  }
+}
+
 export const ESTADOS_CITA = [
-  { value: 'pendiente', label: 'Pendiente', color: '#b8860b' },
-  { value: 'confirmada', label: 'Confirmada', color: '#1a6b3a' },
-  { value: 'hecha', label: 'Hecha', color: '#3d1f0a' },
-  { value: 'cancelada', label: 'Cancelada', color: '#b3261e' },
+  { value: 'pendiente', label: 'Pendiente', color: '#6B5D4E' },
+  { value: 'confirmada', label: 'Confirmada', color: '#4C6E8F' },
+  { value: 'hecha', label: 'Hecha', color: '#2F6B45' },
+  { value: 'cancelada', label: 'Cancelada', color: '#B3261E' },
 ];
 
 export function estadoCita(value) {

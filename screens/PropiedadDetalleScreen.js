@@ -13,6 +13,7 @@ import { API } from '../utils/api';
 import { subirArchivo } from '../utils/upload';
 import { compartirTexto, compartirArchivo, compartirArchivos } from '../utils/compartir';
 import { ESPACIOS, COCINA_OPCIONES, fmtColones, fmtM2, amenidadesEfectivas, espaciosPersonalizados, ICONO_ESPACIO_PERSONALIZADO } from '../utils/caracteristicas';
+import { COLORES, FUENTE_TITULO, FUENTE_CUERPO_600, FUENTE_CUERPO_700 } from '../utils/theme';
 
 const ANCHO_PANTALLA = Dimensions.get('window').width;
 
@@ -268,7 +269,7 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
             {item.tipoVisual === 'imagen'
               ? <Image source={m.url} style={s.mediaImg} contentFit="cover" transition={150} cachePolicy="memory-disk" />
               : <View style={s.mediaPlaceholder}>
-                  <MaterialCommunityIcons name="file-document" size={28} color="#3d1f0a" />
+                  <MaterialCommunityIcons name="file-document" size={28} color={COLORES.acento} />
                 </View>
             }
           </TouchableOpacity>
@@ -317,11 +318,11 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
         <View style={s.tituloFila}>
           <Text style={[s.titulo, { flex: 1 }]}>{propiedad.titulo}</Text>
           <TouchableOpacity style={s.btnCompartirChico} onPress={() => compartirTexto(resumenTexto())}>
-            <MaterialCommunityIcons name="share-variant" size={20} color="#3d1f0a" />
+            <MaterialCommunityIcons name="share-variant" size={20} color={COLORES.acento} />
           </TouchableOpacity>
         </View>
         <View style={s.ubicacionFila}>
-          <MaterialCommunityIcons name="map-marker" size={16} color="#7a5c3a" />
+          <MaterialCommunityIcons name="map-marker" size={16} color={COLORES.muted} />
           <Text style={s.ubicacion}>{propiedad.ubicacion}</Text>
         </View>
         {(propiedad.distrito || propiedad.canton || propiedad.provincia) && (
@@ -333,7 +334,7 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
           <View style={s.descripcionFila}>
             <Text style={[s.descripcion, { flex: 1 }]}>{propiedad.descripcion}</Text>
             <TouchableOpacity onPress={() => compartirTexto(propiedad.descripcion)}>
-              <MaterialCommunityIcons name="share-variant" size={16} color="#7a5c3a" />
+              <MaterialCommunityIcons name="share-variant" size={16} color={COLORES.muted} />
             </TouchableOpacity>
           </View>
         )}
@@ -366,7 +367,7 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
           <View style={s.gridDatos}>
             {todosLosDatos.map((d, i) => (
               <View key={i} style={s.datoCard}>
-                <MaterialCommunityIcons name={d.icon} size={22} color="#3d1f0a" />
+                <MaterialCommunityIcons name={d.icon} size={22} color={COLORES.acento} />
                 <Text style={s.datoValor}>{d.valor}</Text>
                 {!!d.label && <Text style={s.datoLabel}>{d.label}</Text>}
               </View>
@@ -381,7 +382,7 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
             <View style={s.chips}>
               {amenidades.map(a => (
                 <View key={a} style={s.amenidadChip}>
-                  <MaterialCommunityIcons name="star-four-points-outline" size={16} color="#3d1f0a" />
+                  <MaterialCommunityIcons name="star-four-points-outline" size={16} color={COLORES.acento} />
                   <Text style={s.amenidadChipText}>{a}</Text>
                 </View>
               ))}
@@ -396,7 +397,7 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
               <Text style={s.seccionTitulo}>Ubicación en el mapa</Text>
               {!!propiedad.maps_link && (
                 <TouchableOpacity onPress={() => compartirTexto(propiedad.maps_link)}>
-                  <MaterialCommunityIcons name="share-variant" size={16} color="#7a5c3a" />
+                  <MaterialCommunityIcons name="share-variant" size={16} color={COLORES.muted} />
                 </TouchableOpacity>
               )}
             </View>
@@ -419,12 +420,12 @@ export default function PropiedadDetalleScreen({ route, navigation }) {
           </View>
         )}
 
-        <TouchableOpacity style={s.btnSecundario} onPress={() => navigation.navigate('PropiedadForm', { propiedad })}>
-          <Text style={s.btnSecundarioText}>Editar información</Text>
+        <TouchableOpacity style={s.btnPrimario} onPress={() => navigation.navigate('PropiedadForm', { propiedad })}>
+          <Text style={s.btnPrimarioText}>Editar información</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={s.btnSecundario} onPress={cambiarEstado}>
-          <Text style={s.btnSecundarioText}>{propiedad.estado === 'inactiva' ? '✅ Reactivar propiedad' : '🚫 Marcar como inactiva'}</Text>
+          <Text style={s.btnSecundarioText}>{propiedad.estado === 'inactiva' ? 'Reactivar propiedad' : 'Marcar como inactiva'}</Text>
         </TouchableOpacity>
       </View>
     </>
@@ -506,49 +507,51 @@ function ReproductorVideo({ uri }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f0eb' },
-  fotoPortada: { width: ANCHO_PANTALLA, height: 260 },
-  tipoChip: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', backgroundColor: '#3d1f0a', borderRadius: 20, paddingVertical: 4, paddingHorizontal: 10, marginBottom: 8 },
-  tipoChipText: { color: '#fff', fontSize: 12, fontWeight: '700' },
-  chipInactiva: { alignSelf: 'flex-start', backgroundColor: '#b3261e', borderRadius: 20, paddingVertical: 4, paddingHorizontal: 10, marginBottom: 8 },
-  titulo: { fontSize: 20, fontWeight: '700', color: '#1a1a1a' },
+  container: { flex: 1, backgroundColor: COLORES.fondo },
+  fotoPortada: { width: ANCHO_PANTALLA, height: 280 },
+  tipoChip: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', backgroundColor: COLORES.acento, borderRadius: 20, paddingVertical: 4, paddingHorizontal: 10, marginBottom: 8 },
+  tipoChipText: { color: '#fff', fontSize: 12, fontFamily: FUENTE_CUERPO_700 },
+  chipInactiva: { alignSelf: 'flex-start', backgroundColor: COLORES.peligro, borderRadius: 20, paddingVertical: 4, paddingHorizontal: 10, marginBottom: 8 },
+  titulo: { fontFamily: FUENTE_TITULO, fontSize: 22, color: COLORES.tinta },
   tituloFila: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
   btnCompartirChico: { padding: 4 },
   ubicacionFila: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
-  ubicacionAdmin: { fontSize: 12, color: '#9a8674', marginTop: 2, marginLeft: 20 },
-  ubicacion: { fontSize: 14, color: '#7a5c3a' },
+  ubicacionAdmin: { fontSize: 12, color: COLORES.muted, marginTop: 2, marginLeft: 20 },
+  ubicacion: { fontSize: 14, color: COLORES.muted },
   descripcionFila: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: 12 },
-  descripcion: { fontSize: 14, color: '#333', lineHeight: 20 },
-  areasTexto: { fontSize: 13, color: '#7a5c3a', marginTop: 10 },
-  textoInfo: { fontSize: 13, color: '#7a5c3a', marginBottom: 4 },
-  video: { width: '100%', height: 220, borderRadius: 12, backgroundColor: '#000' },
-  borrarVideo: { color: '#b3261e', fontWeight: '600', fontSize: 13, textAlign: 'center', marginTop: 8 },
+  descripcion: { fontSize: 14, color: COLORES.tinta, lineHeight: 20 },
+  areasTexto: { fontSize: 13, color: COLORES.muted, marginTop: 10 },
+  textoInfo: { fontSize: 13, color: COLORES.muted, marginBottom: 4 },
+  video: { width: '100%', height: 220, borderRadius: 16, backgroundColor: '#000' },
+  borrarVideo: { color: COLORES.peligro, fontFamily: FUENTE_CUERPO_600, fontSize: 13, textAlign: 'center', marginTop: 8 },
   gridDatos: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 16 },
-  datoCard: { width: '31%', backgroundColor: '#fff', borderRadius: 12, padding: 12, alignItems: 'center', gap: 4 },
-  datoValor: { fontSize: 14, fontWeight: '700', color: '#1a1a1a' },
-  datoLabel: { fontSize: 11, color: '#7a5c3a', textAlign: 'center' },
+  datoCard: { width: '31%', backgroundColor: COLORES.superficie, borderWidth: 1, borderColor: COLORES.borde, borderRadius: 14, padding: 12, alignItems: 'center', gap: 4 },
+  datoValor: { fontSize: 14, fontFamily: FUENTE_CUERPO_700, color: COLORES.tinta },
+  datoLabel: { fontSize: 11, color: COLORES.muted, textAlign: 'center' },
   seccion: { marginTop: 20 },
   seccionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  seccionTitulo: { fontSize: 15, fontWeight: '600', color: '#1a1a1a', marginBottom: 8 },
+  seccionTitulo: { fontFamily: FUENTE_TITULO, fontSize: 16, color: COLORES.tinta, marginBottom: 8 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  amenidadChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#e8ddd5', borderRadius: 20, paddingVertical: 6, paddingHorizontal: 12 },
-  amenidadChipText: { fontSize: 12, fontWeight: '600', color: '#3d1f0a' },
-  mapaContenedor: { width: '100%', height: 200, borderRadius: 12, overflow: 'hidden', marginBottom: 10 },
+  amenidadChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: COLORES.chipFondo, borderRadius: 20, paddingVertical: 6, paddingHorizontal: 12 },
+  amenidadChipText: { fontSize: 12, fontFamily: FUENTE_CUERPO_600, color: COLORES.muted },
+  mapaContenedor: { width: '100%', height: 200, borderRadius: 16, overflow: 'hidden', marginBottom: 10 },
   mapa: { width: '100%', height: '100%' },
-  btnMaps: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#3d1f0a', borderRadius: 10, padding: 12 },
-  btnMapsText: { color: '#fff', fontWeight: '600' },
-  btnSecundario: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#1a1a1a', borderRadius: 10, padding: 12, alignItems: 'center', marginTop: 20 },
-  btnSecundarioText: { color: '#1a1a1a', fontWeight: '600' },
-  agregar: { color: '#3d1f0a', fontWeight: '600', fontSize: 13 },
-  vacio: { color: '#9a8674', fontSize: 13 },
+  btnMaps: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: COLORES.acento, borderRadius: 14, padding: 12 },
+  btnMapsText: { color: '#fff', fontFamily: FUENTE_CUERPO_600 },
+  btnPrimario: { backgroundColor: COLORES.acento, borderRadius: 14, padding: 14, alignItems: 'center', marginTop: 20 },
+  btnPrimarioText: { color: '#fff', fontFamily: FUENTE_CUERPO_600, fontSize: 14 },
+  btnSecundario: { backgroundColor: COLORES.superficie, borderWidth: 1, borderColor: COLORES.bordeFuerte, borderRadius: 14, padding: 12, alignItems: 'center', marginTop: 12 },
+  btnSecundarioText: { color: COLORES.muted, fontFamily: FUENTE_CUERPO_600, fontSize: 13 },
+  agregar: { color: COLORES.acento, fontFamily: FUENTE_CUERPO_600, fontSize: 13 },
+  vacio: { color: COLORES.muted, fontSize: 13 },
   filaHeader: { marginTop: 20, marginBottom: 8, paddingHorizontal: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   filaGrid: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, marginBottom: 10 },
   mediaItem: {},
-  mediaImg: { width: 100, height: 100, borderRadius: 10 },
-  mediaPlaceholder: { width: 100, height: 100, borderRadius: 10, backgroundColor: '#e8ddd5', alignItems: 'center', justifyContent: 'center' },
+  mediaImg: { width: 100, height: 100, borderRadius: 14 },
+  mediaPlaceholder: { width: 100, height: 100, borderRadius: 14, backgroundColor: COLORES.chipFondo, alignItems: 'center', justifyContent: 'center' },
   visorHeader: { paddingTop: 48, paddingHorizontal: 16, alignItems: 'flex-end' },
   visorCerrar: { padding: 8 },
-  visorAcciones: { flexDirection: 'row', justifyContent: 'space-evenly', paddingVertical: 24, backgroundColor: 'rgba(0,0,0,0.92)' },
+  visorAcciones: { flexDirection: 'row', justifyContent: 'space-evenly', paddingVertical: 24, backgroundColor: 'rgba(36,28,21,0.92)' },
   visorBoton: { alignItems: 'center', gap: 6 },
-  visorBotonText: { color: '#fff', fontSize: 12, fontWeight: '600' },
+  visorBotonText: { color: '#fff', fontSize: 12, fontFamily: FUENTE_CUERPO_600 },
 });

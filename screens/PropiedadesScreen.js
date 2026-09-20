@@ -5,6 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { API } from '../utils/api';
 import { PROVINCIAS, cantonesDe, distritosDe } from '../utils/ubicacionCR';
+import { COLORES, FUENTE_TITULO, FUENTE_CUERPO_600, FUENTE_CUERPO_700 } from '../utils/theme';
 
 function fmtPrecio(n) {
   if (n == null) return 'Precio a consultar';
@@ -157,24 +158,24 @@ export default function PropiedadesScreen({ navigation, onLogout }) {
                 { text: 'Cerrar sesión', style: 'destructive', onPress: onLogout },
                 { text: 'Cancelar', style: 'cancel' },
               ])}>
-                <MaterialCommunityIcons name="cog" size={24} color="#3d1f0a" />
+                <MaterialCommunityIcons name="cog" size={24} color={COLORES.acento} />
               </TouchableOpacity>
               {propiedades.length > 0 && (
                 <TouchableOpacity onPress={() => setMostrarFiltros(true)}>
                   <View>
-                    <MaterialCommunityIcons name="filter-variant" size={22} color={hayFiltrosActivos ? '#b3261e' : '#3d1f0a'} />
+                    <MaterialCommunityIcons name="filter-variant" size={22} color={hayFiltrosActivos ? COLORES.peligro : COLORES.acento} />
                     {hayFiltrosActivos && <View style={s.puntoFiltro} />}
                   </View>
                 </TouchableOpacity>
               )}
               {propiedades.length > 0 && (
                 <TouchableOpacity onPress={toggleModoEditar}>
-                  <MaterialCommunityIcons name="pencil-outline" size={22} color="#3d1f0a" />
+                  <MaterialCommunityIcons name="pencil-outline" size={22} color={COLORES.acento} />
                 </TouchableOpacity>
               )}
               {propiedades.length > 0 && (
                 <TouchableOpacity onPress={toggleModoBorrar}>
-                  <MaterialCommunityIcons name="trash-can-outline" size={22} color="#b3261e" />
+                  <MaterialCommunityIcons name="trash-can-outline" size={22} color={COLORES.peligro} />
                 </TouchableOpacity>
               )}
               <TouchableOpacity style={s.btnNueva} onPress={() => navigation.navigate('PropiedadForm')}>
@@ -247,7 +248,7 @@ export default function PropiedadesScreen({ navigation, onLogout }) {
           <View style={s.filtrosHeader}>
             <Text style={s.filtrosTitulo}>Filtros</Text>
             <TouchableOpacity onPress={() => setMostrarFiltros(false)}>
-              <MaterialCommunityIcons name="close" size={26} color="#1a1a1a" />
+              <MaterialCommunityIcons name="close" size={26} color={COLORES.tinta} />
             </TouchableOpacity>
           </View>
           <ScrollView style={{ flex: 1, padding: 16 }}>
@@ -336,51 +337,51 @@ export default function PropiedadesScreen({ navigation, onLogout }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f0eb' },
+  container: { flex: 1, backgroundColor: COLORES.fondo },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingBottom: 0 },
-  headerTitulo: { fontSize: 22, fontWeight: '700', color: '#1a1a1a' },
-  btnNueva: { backgroundColor: '#1a1a1a', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
-  btnNuevaText: { color: '#fff', fontWeight: '600', fontSize: 13 },
-  btnCancelarText: { color: '#1a1a1a', fontWeight: '600', fontSize: 13 },
-  btnBorrarConfirmar: { backgroundColor: '#b3261e', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
-  btnBorrarConfirmarText: { color: '#fff', fontWeight: '600', fontSize: 13 },
+  headerTitulo: { fontFamily: FUENTE_TITULO, fontSize: 26, color: COLORES.tinta },
+  btnNueva: { backgroundColor: COLORES.acento, borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
+  btnNuevaText: { color: '#fff', fontFamily: FUENTE_CUERPO_600, fontSize: 13 },
+  btnCancelarText: { color: COLORES.tinta, fontFamily: FUENTE_CUERPO_600, fontSize: 13 },
+  btnBorrarConfirmar: { backgroundColor: COLORES.peligro, borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
+  btnBorrarConfirmarText: { color: '#fff', fontFamily: FUENTE_CUERPO_600, fontSize: 13 },
   btnDeshabilitado: { opacity: 0.4 },
-  avisoModo: { textAlign: 'center', color: '#7a5c3a', fontSize: 12, paddingHorizontal: 16, paddingTop: 10 },
-  vistaChips: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingTop: 12 },
-  vistaChip: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 16 },
-  vistaChipActivo: { backgroundColor: '#3d1f0a', borderColor: '#3d1f0a' },
-  vistaChipText: { fontSize: 13, fontWeight: '600', color: '#3d1f0a' },
+  avisoModo: { textAlign: 'center', color: COLORES.muted, fontSize: 12, paddingHorizontal: 16, paddingTop: 10 },
+  vistaChips: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingTop: 14 },
+  vistaChip: { backgroundColor: COLORES.superficie, borderWidth: 1, borderColor: COLORES.bordeFuerte, borderRadius: 20, paddingVertical: 9, paddingHorizontal: 16 },
+  vistaChipActivo: { backgroundColor: COLORES.acento, borderColor: COLORES.acento },
+  vistaChipText: { fontSize: 13, fontFamily: FUENTE_CUERPO_600, color: COLORES.muted },
   vistaChipTextActivo: { color: '#fff' },
-  chipInactiva: { backgroundColor: '#b3261e', borderRadius: 20, paddingVertical: 2, paddingHorizontal: 8 },
-  vacio: { textAlign: 'center', color: '#9a8674', marginTop: 40 },
-  card: { flexDirection: 'row', backgroundColor: '#fff', borderRadius: 12, padding: 12, marginBottom: 12, gap: 12, alignItems: 'center' },
-  cardSeleccionada: { borderWidth: 2, borderColor: '#b3261e' },
-  checkCirculo: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: '#b3261e', alignItems: 'center', justifyContent: 'center' },
-  checkCirculoActivo: { backgroundColor: '#b3261e' },
-  editOverlay: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#3d1f0a', alignItems: 'center', justifyContent: 'center' },
-  foto: { width: 64, height: 64, borderRadius: 10 },
-  fotoVacia: { width: 64, height: 64, borderRadius: 10, backgroundColor: '#e8ddd5', alignItems: 'center', justifyContent: 'center' },
-  titulo: { fontSize: 15, fontWeight: '600', color: '#1a1a1a' },
-  detalle: { fontSize: 12, color: '#7a5c3a', marginTop: 2 },
-  precio: { fontSize: 13, fontWeight: '600', color: '#3d1f0a', marginTop: 4 },
+  chipInactiva: { backgroundColor: COLORES.peligro, borderRadius: 20, paddingVertical: 2, paddingHorizontal: 8 },
+  vacio: { textAlign: 'center', color: COLORES.muted, marginTop: 40 },
+  card: { flexDirection: 'row', backgroundColor: COLORES.superficie, borderRadius: 16, padding: 12, marginBottom: 12, gap: 12, alignItems: 'center', borderWidth: 1, borderColor: COLORES.borde },
+  cardSeleccionada: { borderWidth: 2, borderColor: COLORES.peligro },
+  checkCirculo: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: COLORES.peligro, alignItems: 'center', justifyContent: 'center' },
+  checkCirculoActivo: { backgroundColor: COLORES.peligro },
+  editOverlay: { width: 24, height: 24, borderRadius: 12, backgroundColor: COLORES.acento, alignItems: 'center', justifyContent: 'center' },
+  foto: { width: 64, height: 64, borderRadius: 12 },
+  fotoVacia: { width: 64, height: 64, borderRadius: 12, backgroundColor: COLORES.chipFondo, alignItems: 'center', justifyContent: 'center' },
+  titulo: { fontFamily: FUENTE_TITULO, fontSize: 15, color: COLORES.tinta },
+  detalle: { fontSize: 12, color: COLORES.muted, marginTop: 2 },
+  precio: { fontFamily: FUENTE_CUERPO_700, fontSize: 14, color: COLORES.acento, marginTop: 4 },
   chipsFila: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginBottom: 4 },
-  tipoChip: { backgroundColor: '#3d1f0a', borderRadius: 20, paddingVertical: 2, paddingHorizontal: 8 },
-  tipoChipText: { color: '#fff', fontSize: 10, fontWeight: '700' },
-  puntoFiltro: { position: 'absolute', top: -2, right: -2, width: 8, height: 8, borderRadius: 4, backgroundColor: '#b3261e' },
-  filtrosContainer: { flex: 1, backgroundColor: '#f5f0eb' },
-  filtrosHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: 50, backgroundColor: '#fff' },
-  filtrosTitulo: { fontSize: 18, fontWeight: '700', color: '#1a1a1a' },
-  label: { fontSize: 13, fontWeight: '600', color: '#7a5c3a', marginBottom: 6, marginTop: 16 },
-  input: { backgroundColor: '#fff', color: '#1a1a1a', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 10, padding: 12, fontSize: 15 },
+  tipoChip: { backgroundColor: COLORES.acento, borderRadius: 20, paddingVertical: 2, paddingHorizontal: 8 },
+  tipoChipText: { color: '#fff', fontSize: 10, fontFamily: FUENTE_CUERPO_700 },
+  puntoFiltro: { position: 'absolute', top: -2, right: -2, width: 8, height: 8, borderRadius: 4, backgroundColor: COLORES.peligro },
+  filtrosContainer: { flex: 1, backgroundColor: COLORES.fondo },
+  filtrosHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: 50, backgroundColor: COLORES.superficie },
+  filtrosTitulo: { fontFamily: FUENTE_TITULO, fontSize: 18, color: COLORES.tinta },
+  label: { fontSize: 13, fontFamily: FUENTE_CUERPO_600, color: COLORES.muted, marginBottom: 6, marginTop: 16 },
+  input: { backgroundColor: COLORES.superficie, color: COLORES.tinta, borderWidth: 1, borderColor: COLORES.bordeFuerte, borderRadius: 12, padding: 12, fontSize: 15 },
   fila: { flexDirection: 'row', gap: 10 },
   filaItem: { flex: 1 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
-  chipActivo: { backgroundColor: '#3d1f0a', borderColor: '#3d1f0a' },
-  chipText: { fontSize: 13, fontWeight: '600', color: '#3d1f0a' },
+  chip: { backgroundColor: COLORES.superficie, borderWidth: 1, borderColor: COLORES.bordeFuerte, borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
+  chipActivo: { backgroundColor: COLORES.acento, borderColor: COLORES.acento },
+  chipText: { fontSize: 13, fontFamily: FUENTE_CUERPO_600, color: COLORES.muted },
   chipTextActivo: { color: '#fff' },
-  btnLimpiarText: { color: '#b3261e', fontWeight: '600', fontSize: 13, textAlign: 'center' },
-  filtrosFooter: { padding: 16, backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#e0d8cd' },
-  btnAplicar: { backgroundColor: '#1a1a1a', borderRadius: 10, padding: 14, alignItems: 'center' },
-  btnAplicarText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  btnLimpiarText: { color: COLORES.peligro, fontFamily: FUENTE_CUERPO_600, fontSize: 13, textAlign: 'center' },
+  filtrosFooter: { padding: 16, backgroundColor: COLORES.superficie, borderTopWidth: 1, borderTopColor: COLORES.borde },
+  btnAplicar: { backgroundColor: COLORES.acento, borderRadius: 14, padding: 14, alignItems: 'center' },
+  btnAplicarText: { color: '#fff', fontSize: 16, fontFamily: FUENTE_CUERPO_600 },
 });

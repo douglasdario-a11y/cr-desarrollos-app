@@ -6,6 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import { API } from '../utils/api';
 import { subirDocumentoPropietario } from '../utils/upload';
+import { COLORES, FUENTE_TITULO, FUENTE_CUERPO_600, FUENTE_CUERPO_700 } from '../utils/theme';
 
 function numeroWhatsapp(telefono) {
   const digitos = (telefono || '').replace(/\D/g, '');
@@ -82,15 +83,15 @@ export default function PropietarioDetalleScreen({ route, navigation }) {
       <View style={{ padding: 16 }}>
         <View style={s.filaTitulo}>
           <Text style={s.nombre}>{propietario.nombre}</Text>
-          <View style={s.badgeTipo}>
-            <Text style={s.badgeTipoText}>{propietario.tipo === 'juridica' ? 'Persona jurídica' : 'Persona física'}</Text>
+          <View style={[s.badgeTipo, propietario.tipo === 'juridica' && { backgroundColor: COLORES.acento }]}>
+            <Text style={[s.badgeTipoText, propietario.tipo === 'juridica' && { color: '#fff' }]}>{propietario.tipo === 'juridica' ? 'Persona jurídica' : 'Persona física'}</Text>
           </View>
         </View>
 
         <View style={s.accesosFila}>
           {!!propietario.telefono && (
             <TouchableOpacity style={s.accesoBoton} onPress={() => Linking.openURL(`tel:${propietario.telefono}`)}>
-              <MaterialCommunityIcons name="phone" size={22} color="#3d1f0a" />
+              <MaterialCommunityIcons name="phone" size={22} color={COLORES.acento} />
               <Text style={s.accesoTexto}>Llamar</Text>
             </TouchableOpacity>
           )}
@@ -102,7 +103,7 @@ export default function PropietarioDetalleScreen({ route, navigation }) {
           )}
           {!!propietario.email && (
             <TouchableOpacity style={s.accesoBoton} onPress={() => Linking.openURL(`mailto:${propietario.email}`)}>
-              <MaterialCommunityIcons name="email" size={22} color="#3d1f0a" />
+              <MaterialCommunityIcons name="email" size={22} color={COLORES.acento} />
               <Text style={s.accesoTexto}>Correo</Text>
             </TouchableOpacity>
           )}
@@ -194,26 +195,26 @@ export default function PropietarioDetalleScreen({ route, navigation }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f0eb' },
+  container: { flex: 1, backgroundColor: COLORES.fondo },
   filaTitulo: { flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
-  nombre: { fontSize: 20, fontWeight: '700', color: '#1a1a1a' },
-  badgeTipo: { backgroundColor: '#fff', borderRadius: 20, paddingVertical: 4, paddingHorizontal: 10 },
-  badgeTipoText: { fontSize: 11, fontWeight: '700', color: '#7a5c3a' },
+  nombre: { fontFamily: FUENTE_TITULO, fontSize: 20, color: COLORES.tinta },
+  badgeTipo: { backgroundColor: COLORES.chipFondo, borderRadius: 20, paddingVertical: 4, paddingHorizontal: 10 },
+  badgeTipoText: { fontSize: 11, fontFamily: FUENTE_CUERPO_700, color: COLORES.muted },
   accesosFila: { flexDirection: 'row', gap: 10, marginTop: 16 },
-  accesoBoton: { flex: 1, backgroundColor: '#fff', borderRadius: 12, paddingVertical: 12, alignItems: 'center', gap: 4 },
-  accesoTexto: { fontSize: 12, fontWeight: '600', color: '#3d1f0a' },
+  accesoBoton: { flex: 1, backgroundColor: COLORES.superficie, borderRadius: 14, paddingVertical: 12, alignItems: 'center', gap: 4, borderWidth: 1, borderColor: COLORES.borde },
+  accesoTexto: { fontSize: 12, fontFamily: FUENTE_CUERPO_600, color: COLORES.tinta },
   seccion: { marginTop: 20 },
-  seccionTitulo: { fontSize: 15, fontWeight: '600', color: '#1a1a1a', marginBottom: 8 },
-  textoInfo: { fontSize: 13, color: '#7a5c3a', marginBottom: 6 },
-  notas: { fontSize: 14, color: '#333', lineHeight: 20 },
-  vacio: { color: '#9a8674', fontSize: 13, marginBottom: 10 },
+  seccionTitulo: { fontFamily: FUENTE_TITULO, fontSize: 16, color: COLORES.tinta, marginBottom: 8 },
+  textoInfo: { fontSize: 13, color: COLORES.muted, marginBottom: 6 },
+  notas: { fontSize: 14, color: COLORES.tinta, lineHeight: 20 },
+  vacio: { color: COLORES.muted, fontSize: 13, marginBottom: 10 },
   docFila: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 10 },
-  docLink: { color: '#3d1f0a', fontSize: 14, fontWeight: '600' },
-  btnBorrarText: { fontSize: 12, fontWeight: '600', color: '#b3261e' },
-  btnSubirDoc: { alignSelf: 'flex-start', backgroundColor: '#fff', borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 10, paddingVertical: 10, paddingHorizontal: 16 },
-  btnSubirDocText: { color: '#3d1f0a', fontSize: 13, fontWeight: '600' },
-  propFila: { backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 10 },
-  propFilaText: { fontSize: 14, fontWeight: '600', color: '#1a1a1a' },
-  btnSecundario: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#1a1a1a', borderRadius: 10, padding: 12, alignItems: 'center', marginTop: 24, marginBottom: 40 },
-  btnSecundarioText: { color: '#1a1a1a', fontWeight: '600' },
+  docLink: { color: COLORES.acento, fontSize: 14, fontFamily: FUENTE_CUERPO_600 },
+  btnBorrarText: { fontSize: 12, fontFamily: FUENTE_CUERPO_600, color: COLORES.peligro },
+  btnSubirDoc: { alignSelf: 'flex-start', backgroundColor: COLORES.superficie, borderWidth: 1, borderColor: COLORES.bordeFuerte, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 16 },
+  btnSubirDocText: { color: COLORES.acento, fontSize: 13, fontFamily: FUENTE_CUERPO_600 },
+  propFila: { backgroundColor: COLORES.superficie, borderRadius: 14, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: COLORES.borde },
+  propFilaText: { fontSize: 14, fontFamily: FUENTE_CUERPO_600, color: COLORES.tinta },
+  btnSecundario: { backgroundColor: COLORES.acento, borderRadius: 14, padding: 14, alignItems: 'center', marginTop: 24, marginBottom: 40 },
+  btnSecundarioText: { color: '#fff', fontFamily: FUENTE_CUERPO_600, fontSize: 14 },
 });

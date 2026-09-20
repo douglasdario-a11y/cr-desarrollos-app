@@ -5,6 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { API } from '../utils/api';
 import { estadoCita, fmtFechaHora } from '../utils/crm';
 import { borrarCitaVinculada } from '../utils/calendarSync';
+import { COLORES, FUENTE_TITULO, FUENTE_CUERPO_600, FUENTE_CUERPO_700 } from '../utils/theme';
 
 const DIAS_SEMANA = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -140,7 +141,7 @@ export default function CitasScreen({ navigation }) {
                     else navigation.navigate('CitaForm', { fecha: clave });
                   }}
                 >
-                  <Text style={s.calDiaTexto}>{dia.getDate()}</Text>
+                  <Text style={[s.calDiaTexto, clave === hoyClave && { color: '#fff', fontFamily: FUENTE_CUERPO_700 }]}>{dia.getDate()}</Text>
                   {citasDia.length > 0 && (
                     <View style={s.calPunto}><Text style={s.calPuntoTexto}>{citasDia.length}</Text></View>
                   )}
@@ -250,41 +251,41 @@ function SeccionCitas({ titulo, citas, vacio, onCambiarEstado, onBorrar, navigat
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f0eb' },
+  container: { flex: 1, backgroundColor: COLORES.fondo },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  headerTitulo: { fontSize: 22, fontWeight: '700', color: '#1a1a1a' },
-  btnNueva: { backgroundColor: '#1a1a1a', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
-  btnNuevaText: { color: '#fff', fontWeight: '600', fontSize: 13 },
-  calendario: { backgroundColor: '#fff', borderRadius: 16, padding: 14 },
+  headerTitulo: { fontFamily: FUENTE_TITULO, fontSize: 26, color: COLORES.tinta },
+  btnNueva: { backgroundColor: COLORES.acento, borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14 },
+  btnNuevaText: { color: '#fff', fontFamily: FUENTE_CUERPO_600, fontSize: 13 },
+  calendario: { backgroundColor: COLORES.superficie, borderRadius: 20, padding: 14, borderWidth: 1, borderColor: COLORES.borde },
   calHeader: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 20, marginBottom: 10 },
-  navMes: { fontSize: 22, color: '#3d1f0a', paddingHorizontal: 10 },
-  mesTexto: { fontSize: 15, fontWeight: '700', color: '#1a1a1a', minWidth: 150, textAlign: 'center' },
+  navMes: { fontSize: 22, color: COLORES.muted, paddingHorizontal: 10 },
+  mesTexto: { fontFamily: FUENTE_CUERPO_700, fontSize: 15, color: COLORES.tinta, minWidth: 150, textAlign: 'center' },
   calGrid: { flexDirection: 'row', flexWrap: 'wrap' },
   calCelda: { width: `${100 / 7}%`, aspectRatio: 1, padding: 2 },
-  calDiaSemana: { textAlign: 'center', fontSize: 11, fontWeight: '700', color: '#9a8674' },
-  calDia: { flex: 1, backgroundColor: '#f5f0eb', borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  calDiaHoy: { backgroundColor: '#e8ddd5' },
-  calDiaTexto: { fontSize: 13, color: '#1a1a1a' },
-  calPunto: { position: 'absolute', bottom: 3, right: 3, backgroundColor: '#3d1f0a', borderRadius: 8, minWidth: 14, height: 14, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3 },
-  calPuntoTexto: { color: '#fff', fontSize: 9, fontWeight: '700' },
-  seccionTitulo: { fontSize: 15, fontWeight: '700', color: '#1a1a1a', marginBottom: 10 },
-  vacio: { color: '#9a8674', fontSize: 13 },
-  fila: { backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 10 },
-  fecha: { fontSize: 14, fontWeight: '700', color: '#1a1a1a' },
+  calDiaSemana: { textAlign: 'center', fontSize: 11, fontFamily: FUENTE_CUERPO_700, color: COLORES.muted },
+  calDia: { flex: 1, backgroundColor: COLORES.fondo, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  calDiaHoy: { backgroundColor: COLORES.acento },
+  calDiaTexto: { fontSize: 13, color: COLORES.tinta },
+  calPunto: { position: 'absolute', bottom: 3, right: 3, backgroundColor: COLORES.acento, borderRadius: 8, minWidth: 14, height: 14, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3 },
+  calPuntoTexto: { color: '#fff', fontSize: 9, fontFamily: FUENTE_CUERPO_700 },
+  seccionTitulo: { fontFamily: FUENTE_TITULO, fontSize: 16, color: COLORES.tinta, marginBottom: 10 },
+  vacio: { color: COLORES.muted, fontSize: 13 },
+  fila: { backgroundColor: COLORES.superficie, borderRadius: 16, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: COLORES.borde },
+  fecha: { fontSize: 14, fontFamily: FUENTE_CUERPO_700, color: COLORES.tinta },
   detalleFila: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 2 },
-  detalle: { fontSize: 12, color: '#7a5c3a' },
+  detalle: { fontSize: 12, color: COLORES.muted },
   accionesFila: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center', marginTop: 8 },
   estadoChip: { borderRadius: 20, paddingVertical: 4, paddingHorizontal: 10 },
-  estadoChipText: { color: '#fff', fontSize: 11, fontWeight: '700' },
-  btnAccion: { borderWidth: 1, borderColor: '#e0d8cd', borderRadius: 8, paddingVertical: 5, paddingHorizontal: 10 },
-  btnAccionText: { fontSize: 12, fontWeight: '600', color: '#3d1f0a' },
-  btnAccionCancelarText: { fontSize: 12, fontWeight: '600', color: '#b3261e' },
-  btnBorrarText: { fontSize: 12, fontWeight: '600', color: '#b3261e' },
-  modalFondo: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
-  modalContenido: { backgroundColor: '#f5f0eb', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, paddingBottom: 30 },
-  modalTitulo: { fontSize: 17, fontWeight: '700', color: '#1a1a1a', marginBottom: 14, textTransform: 'capitalize' },
-  modalFila: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 10, gap: 10 },
-  btnNuevaModal: { backgroundColor: '#1a1a1a', borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 14 },
+  estadoChipText: { color: '#fff', fontSize: 11, fontFamily: FUENTE_CUERPO_700 },
+  btnAccion: { borderWidth: 1, borderColor: COLORES.bordeFuerte, borderRadius: 10, paddingVertical: 5, paddingHorizontal: 10 },
+  btnAccionText: { fontSize: 12, fontFamily: FUENTE_CUERPO_600, color: COLORES.tinta },
+  btnAccionCancelarText: { fontSize: 12, fontFamily: FUENTE_CUERPO_600, color: COLORES.peligro },
+  btnBorrarText: { fontSize: 12, fontFamily: FUENTE_CUERPO_600, color: COLORES.peligro },
+  modalFondo: { flex: 1, backgroundColor: 'rgba(36,28,21,0.45)', justifyContent: 'flex-end' },
+  modalContenido: { backgroundColor: COLORES.fondo, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, paddingBottom: 30 },
+  modalTitulo: { fontFamily: FUENTE_TITULO, fontSize: 17, color: COLORES.tinta, marginBottom: 14, textTransform: 'capitalize' },
+  modalFila: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORES.superficie, borderRadius: 16, padding: 14, marginBottom: 10, gap: 10, borderWidth: 1, borderColor: COLORES.borde },
+  btnNuevaModal: { backgroundColor: COLORES.acento, borderRadius: 14, padding: 14, alignItems: 'center', marginTop: 14 },
   btnCerrarModal: { alignItems: 'center', padding: 12, marginTop: 6 },
-  btnCerrarModalText: { color: '#7a5c3a', fontWeight: '600', fontSize: 13 },
+  btnCerrarModalText: { color: COLORES.muted, fontFamily: FUENTE_CUERPO_600, fontSize: 13 },
 });
