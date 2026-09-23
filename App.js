@@ -8,6 +8,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useFonts, Fraunces_600SemiBold, Fraunces_700Bold } from '@expo-google-fonts/fraunces';
 import { PublicSans_400Regular, PublicSans_500Medium, PublicSans_600SemiBold, PublicSans_700Bold } from '@expo-google-fonts/public-sans';
 import LoginScreen from './screens/LoginScreen';
+import RegistroScreen from './screens/RegistroScreen';
+import RedScreen from './screens/RedScreen';
 import PropiedadesScreen from './screens/PropiedadesScreen';
 import PropiedadDetalleScreen from './screens/PropiedadDetalleScreen';
 import PropiedadFormScreen from './screens/PropiedadFormScreen';
@@ -94,8 +96,17 @@ function UsuariosStack() {
   );
 }
 
+function RedStack() {
+  return (
+    <Stack.Navigator screenOptions={opcionesStack}>
+      <Stack.Screen name="RedLista" component={RedScreen} options={{ title: 'Red' }} />
+    </Stack.Navigator>
+  );
+}
+
 export default function App() {
   const [usuario, setUsuario] = useState(null);
+  const [pantallaAuth, setPantallaAuth] = useState('login'); // 'login' | 'registro'
   const [fuentesListas] = useFonts({
     Fraunces_600SemiBold,
     Fraunces_700Bold,
@@ -118,7 +129,11 @@ export default function App() {
 
   if (!fuentesListas) return null;
 
-  if (!usuario) return <LoginScreen onLogin={setUsuario} />;
+  if (!usuario) {
+    return pantallaAuth === 'registro'
+      ? <RegistroScreen onLogin={setUsuario} onVolver={() => setPantallaAuth('login')} />
+      : <LoginScreen onLogin={setUsuario} onIrARegistro={() => setPantallaAuth('registro')} />;
+  }
 
   return (
     <NavigationContainer>
@@ -135,6 +150,7 @@ export default function App() {
         <Tab.Screen name="Clientes" component={ClientesStack} options={{ tabBarIcon: tabIcon('account-multiple') }} />
         <Tab.Screen name="Propietarios" component={PropietariosStack} options={{ tabBarIcon: tabIcon('account-tie') }} />
         <Tab.Screen name="Citas" component={CitasStack} options={{ tabBarIcon: tabIcon('calendar-month') }} />
+        <Tab.Screen name="Red" component={RedStack} options={{ tabBarIcon: tabIcon('lan') }} />
         <Tab.Screen name="Usuarios" component={UsuariosStack} options={{ tabBarIcon: tabIcon('key-variant') }} />
       </Tab.Navigator>
     </NavigationContainer>

@@ -46,6 +46,7 @@ export default function PropiedadFormScreen({ route, navigation }) {
   const [nuevoEspacio, setNuevoEspacio] = useState('');
   const [amenidades, setAmenidades] = useState(() => amenidadesEfectivas(c));
   const [nuevaAmenidad, setNuevaAmenidad] = useState('');
+  const [compartirRed, setCompartirRed] = useState(!!existente?.compartir_red);
   const [guardando, setGuardando] = useState(false);
 
   const [tipos, setTipos] = useState([]);
@@ -150,6 +151,7 @@ export default function PropiedadFormScreen({ route, navigation }) {
         numero_finca_filial: numeroFincaFilial.trim() || null,
         numero_catastro: numeroCatastro.trim() || null,
         tipo_propiedad: tipoPropiedad || null,
+        compartir_red: compartirRed,
         caracteristicas: {
           habitaciones: habitaciones ? Number(habitaciones) : null,
           banos: banos ? Number(banos) : null,
@@ -228,6 +230,15 @@ export default function PropiedadFormScreen({ route, navigation }) {
           {enAlquiler && <MaterialCommunityIcons name="check" size={14} color="#fff" />}
         </TouchableOpacity>
       </View>
+
+      <Text style={s.label}>Compartir con la red</Text>
+      <View style={s.chips}>
+        <TouchableOpacity style={[s.chip, compartirRed && s.chipActivo]} onPress={() => setCompartirRed(v => !v)}>
+          <Text style={[s.chipText, compartirRed && s.chipTextActivo]}>Visible para otras inmobiliarias</Text>
+          {compartirRed && <MaterialCommunityIcons name="check" size={14} color="#fff" />}
+        </TouchableOpacity>
+      </View>
+      <Text style={s.ayudaRed}>Otras inmobiliarias verán solo el título, fotos, precio, ubicación y descripción — nunca los datos del propietario ni de tus clientes.</Text>
 
       <View style={s.fila}>
         {enVenta && (
@@ -454,4 +465,5 @@ const s = StyleSheet.create({
   chipQuitableText: { fontSize: 13, fontFamily: ESTILOS_FORM.chipText.fontFamily, color: '#fff' },
   filaAgregarTipo: { flexDirection: 'row', gap: 8, marginTop: 8, alignItems: 'center' },
   btnGuardarTipo: { backgroundColor: COLORES.acento, borderRadius: 12, padding: 12 },
+  ayudaRed: { fontSize: 12, color: COLORES.muted, marginTop: 6 },
 });
