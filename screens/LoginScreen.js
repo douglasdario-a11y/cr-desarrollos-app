@@ -16,12 +16,17 @@ export default function LoginScreen({ onLogin, onIrARegistro }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    getEmpresa().then(e => { setEmpresa(e); setCargandoEmpresa(false); });
+    getEmpresa().then(e => {
+      setEmpresa(e);
+      setCargandoEmpresa(false);
+      // Sin empresa recordada se muestra la lista de una vez — así se puede
+      // elegir tocando, sin tener que escribir nada primero.
+      if (!e) buscarEmpresas('');
+    });
   }, []);
 
   async function buscarEmpresas(q) {
     setBusqueda(q);
-    if (!q.trim()) { setResultados([]); return; }
     try {
       const res = await fetch(`${API}/empresas/buscar?q=${encodeURIComponent(q)}`);
       const data = await res.json();
@@ -83,7 +88,7 @@ export default function LoginScreen({ onLogin, onIrARegistro }) {
         {empresa && !buscando ? (
           <View style={s.empresaFila}>
             <Text style={s.empresaTexto}>{empresa.nombre}</Text>
-            <TouchableOpacity onPress={() => setBuscando(true)}>
+            <TouchableOpacity onPress={() => { setBuscando(true); buscarEmpresas(''); }}>
               <Text style={s.linkCambiar}>Cambiar</Text>
             </TouchableOpacity>
           </View>
